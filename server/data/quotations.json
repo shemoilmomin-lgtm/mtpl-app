@@ -1,0 +1,1264 @@
+{
+    "q_1771680582913": {
+        "quotationId": "q_1771680582913",
+        "quotationNumber": 1,
+        "date": "2026-02-21",
+        "clientId": "1769405501630f1lq1xc20",
+        "clientName": "Shrushti Developers",
+        "subject": "",
+        "items": [
+            {
+                "description": "Size: A4 | Pages: 24 | Art Card 350 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "500",
+                "rate": "126.55",
+                "amount": "63275.00",
+                "name": "Brochure"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 24 | Art Card 350 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "1000",
+                "rate": "85.89",
+                "amount": "85890.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 24 | Art Card 300 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "500",
+                "rate": "118.21",
+                "amount": "59105.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 24 | Art Card 300 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "1000",
+                "rate": "78.27",
+                "amount": "78270.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 24 | Imported 270 GSM\nAll Pages Varnish\nDesign Provided by: Client",
+                "qty": "500",
+                "rate": "220.74",
+                "amount": "110370.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 24 | Imported 270 GSM\nAll Pages Varnish\nDesign Provided by: Client",
+                "qty": "1000",
+                "rate": "173.97",
+                "amount": "173970.00"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "clientAddress": "Gut No. 123 and 18, Waliwali Barvi Dam Road, Badlapur (W)"
+    },
+    "q_1771681774407": {
+        "quotationId": "q_1771681774407",
+        "quotationNumber": 2,
+        "date": "2026-02-21",
+        "clientId": "",
+        "clientName": "Planet Builders & Developers",
+        "subject": "Planet Brookfield",
+        "items": [
+            {
+                "description": "Size: A4 | Pages: 8 | Art Card 350 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "500",
+                "rate": "43.51",
+                "amount": "21755.00",
+                "name": "Brochure"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 8 | Art Card 350 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "1000",
+                "rate": "29.95",
+                "amount": "29950.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 8 | Art Card 300 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "500",
+                "rate": "40.73",
+                "amount": "20365.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 8 | Art Card 300 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "1000",
+                "rate": "27.68",
+                "amount": "27680.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 8 | Imported 270 GSM\nAll Pages Varnish\nDesign Provided by: Client",
+                "qty": "500",
+                "rate": "75.74",
+                "amount": "37870.00"
+            },
+            {
+                "name": "Brochure",
+                "description": "Size: A4 | Pages: 8 | Imported 270 GSM\nAll Pages Varnish\nDesign Provided by: Client",
+                "qty": "1000",
+                "rate": "57.99",
+                "amount": "57990.00"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": true,
+        "fromLead": false,
+        "clientAddress": ""
+    },
+    "q_1771990568455": {
+        "quotationId": "q_1771990568455",
+        "quotationNumber": 3,
+        "date": "2026-02-25",
+        "clientId": "",
+        "clientName": "Planet Builders & Developers",
+        "clientAddress": "",
+        "subject": "Planet Brookfield",
+        "items": [
+            {
+                "name": "Brochure",
+                "description": "Size: 240mm width x 340 mm Height\nPages: 16\nPaper: Art Card 350 GSM\nCover Laminated\nDesign Provided by: Client",
+                "qty": "500",
+                "rate": "103.60",
+                "amount": "51800"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": true,
+        "fromLead": false
+    },
+    "q_1772000287622": {
+        "quotationId": "q_1772000287622",
+        "quotationNumber": 4,
+        "date": "2026-02-25",
+        "clientId": "1770710035343",
+        "clientName": "ADVIK RREALTY",
+        "clientAddress": "Office No . C- 102, 1st Floor, Yasho Narayan Building,  Old Panvel, Maharashtra",
+        "subject": "Advik Company Profile",
+        "items": [
+            {
+                "name": "Company Profile Printing - Option 1",
+                "description": "Pages: 16\nSize: A4\nPaper: 270 GSM Fine Paper \nAll Pages Varnish",
+                "qty": "100",
+                "rate": "409.80",
+                "amount": "40980"
+            },
+            {
+                "name": "Company Profile Printing - Option 1",
+                "description": "Pages: 16\nSize: A4\nPaper: 270 GSM Fine Paper \nAll Pages Varnish",
+                "qty": "300",
+                "rate": "190.93",
+                "amount": "57280"
+            },
+            {
+                "name": "Company Profile Printing - Option 2",
+                "description": "Pages: 16\nSize: A4\nPaper: Cover 270 GSM Fine Paper \nPaper: Inner 160 GSM Fine Paper \nAll Pages Varnish",
+                "qty": "100",
+                "rate": "366.90",
+                "amount": "36690"
+            },
+            {
+                "name": "Company Profile Printing - Option 2",
+                "description": "Pages: 16\nSize: A4\nPaper: Cover 270 GSM Fine Paper \nPaper: Inner 160 GSM Fine Paper \nAll Pages Varnish",
+                "qty": "300",
+                "rate": "161.23",
+                "amount": "48370"
+            },
+            {
+                "name": "Company Profile Printing - Option 3",
+                "description": "Pages: 16\nSize: A4\nPaper: 160 GSM Fine Paper \nAll Pages Varnish",
+                "qty": "100",
+                "rate": "352.60",
+                "amount": "35260"
+            },
+            {
+                "name": "Company Profile Printing - Option 3",
+                "description": "Pages: 16\nSize: A4\nPaper: 160 GSM Fine Paper \nAll Pages Varnish",
+                "qty": "300",
+                "rate": "152.67",
+                "amount": "45800"
+            },
+            {
+                "name": "Embossed UV",
+                "description": "On Cover upto 20 sq. inch",
+                "qty": 1,
+                "rate": "4100",
+                "amount": "4100.00"
+            },
+            {
+                "name": "Golden Foiling",
+                "description": "On Cover upto 40 sq. inch ",
+                "qty": 1,
+                "rate": "4500",
+                "amount": "4500.00"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false
+    },
+    "q_1772703990017": {
+        "quotationId": "q_1772703990017",
+        "quotationNumber": 5,
+        "date": "2026-03-05",
+        "clientId": "1770710035343",
+        "clientName": "ADVIK RREALTY",
+        "clientAddress": "Office No . C- 102, 1st Floor, Yasho Narayan Building,  Old Panvel, Maharashtra",
+        "subject": "Envelope A4 Size",
+        "items": [
+            {
+                "name": "Envelope",
+                "description": "Size: A4\nPaper: Fine Paper (JR-RNDZ105)\nGSM: 105",
+                "qty": "300",
+                "rate": "51.67",
+                "amount": "15500"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": false,
+        "manualClient": false
+    },
+    "q_1772704721082": {
+        "quotationId": "q_1772704721082",
+        "quotationNumber": 6,
+        "date": "2026-03-05",
+        "clientId": "1769405501630f1lq1xc20",
+        "clientName": "Shrushti Developers",
+        "clientAddress": "Gut No. 123 and 18, Waliwali Barvi Dam Road, Badlapur (W)",
+        "subject": "Coffee Table",
+        "items": [
+            {
+                "name": "Coffee Table",
+                "description": "Project: Hari Shrushti \nDesign and Printing\nPages: 28 \nClosed Size: 420x297 mm\nOpen Size: 840x297 mm\nCover Paper: Hardbound Cover with Matt Lamination and Golden Letters)\nInner Paper: 270+270= 540 GSM Fine Paper (SN-MBINS275)",
+                "qty": "4",
+                "rate": "11040.00",
+                "amount": "44160"
+            },
+            {
+                "name": "Coffee Table",
+                "description": "Project: Hari Shrushti \nDesign and Printing\nPages: 28 \nClosed Size: 420x297 mm\nOpen Size: 840x297 mm\nCover Paper: Hardbound Cover with Matt Lamination and Golden Letters)\nInner Paper: 270+270= 540 GSM Fine Paper (SN-MBINS275)",
+                "qty": "6",
+                "rate": "9250.00",
+                "amount": "55500"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": false
+    },
+    "q_1772708004010": {
+        "quotationId": "q_1772708004010",
+        "quotationNumber": 7,
+        "date": "2026-03-05",
+        "clientId": "",
+        "clientName": "Sky City Group",
+        "clientAddress": "",
+        "subject": "Sky Elite",
+        "items": [
+            {
+                "name": "Brochure Designing",
+                "description": "Pages: 12\nSize: 9\"x13\"\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF, JPEG",
+                "qty": 1,
+                "rate": "24000.00",
+                "amount": "24000"
+            },
+            {
+                "name": "Brochure Designing",
+                "description": "Pages: 16\nSize: 9\"x13\"\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF, JPEG",
+                "qty": 1,
+                "rate": "32000",
+                "amount": "32000.00"
+            },
+            {
+                "name": "Wall Branding",
+                "description": "Multiple Sizes\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF, JPEG",
+                "qty": "10",
+                "rate": "1770",
+                "amount": "17700.00"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": true
+    },
+    "q_1772863290188": {
+        "quotationId": "q_1772863290188",
+        "quotationNumber": 8,
+        "date": "2026-03-07",
+        "clientId": "1769405662311z1bwcc75q",
+        "clientName": "VKREATE KITCHENS",
+        "clientAddress": "Shop No. 2, Sai Darshan CHS, Opp. Sai Baba Temple, Sonarpada, Kalyan Shil Road,, Dombivali, Maharashtra",
+        "subject": "One way Vision",
+        "items": [
+            {
+                "name": "One Way Vision",
+                "description": "Designing & Pasting\nSize : 8x11 Qty - 2\nPrachi sets Provide by Client",
+                "qty": "1",
+                "rate": "19564",
+                "amount": "19564.00"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": false,
+        "manualClient": false
+    },
+    "q_1773226705861": {
+        "quotationId": "q_1773226705861",
+        "quotationNumber": 9,
+        "date": "2026-03-11",
+        "clientId": "1772265117179",
+        "clientName": "ALTAMONTT REALTY LLP",
+        "clientAddress": "Office No. 811, Shelton Sapphire, Plot No. 18,19, Sector-15, CBD Belapur,, Navi Mumbai",
+        "subject": "Brochure Designing",
+        "items": [
+            {
+                "name": "Brochure Designing",
+                "description": "Pages: 12\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF\n",
+                "qty": 1,
+                "rate": "24000",
+                "amount": "24000.00"
+            },
+            {
+                "name": "Brochure Desiging",
+                "description": "Pages: 16\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF",
+                "qty": 1,
+                "rate": "28800",
+                "amount": "28800.00"
+            },
+            {
+                "name": "Brochure Designing",
+                "description": "Pages: 20\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF",
+                "qty": 1,
+                "rate": "36000",
+                "amount": "36000.00"
+            }
+        ],
+        "discount": "",
+        "notes": "Note: Design for review will be shared with a watermark. Final files will be delivered after payment is completed.\nPayment Terms: 50% advance. Balance 50% after design approval and before delivery.",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773293958772": {
+        "quotationId": "q_1773293958772",
+        "quotationNumber": 10,
+        "date": "2026-03-12",
+        "clientId": "1769841835766",
+        "clientName": "Drillboss Infra Project",
+        "clientAddress": "",
+        "subject": "Stationery",
+        "items": [
+            {
+                "name": "Designing",
+                "description": "1 - Visiting Cards\n2 - Letterheads\n3 - Envelopes",
+                "qty": "3",
+                "rate": "1000",
+                "amount": "3000.00"
+            },
+            {
+                "name": "Visiting Card Printing",
+                "description": "Visiting Cards - Die Cut",
+                "qty": "500",
+                "rate": "4.13",
+                "amount": "2065"
+            },
+            {
+                "name": "Visiting Card Printing",
+                "description": "Visiting Cards - Die Cut",
+                "qty": "1000",
+                "rate": "2.92",
+                "amount": "2925"
+            },
+            {
+                "name": "Letterhead Printing - Imported Paper",
+                "description": "Paper: JRRUW-105 (Imported)",
+                "qty": "500",
+                "rate": "17.55",
+                "amount": "8775"
+            },
+            {
+                "name": "Letterhead Printing - Imported Paper",
+                "description": "Paper: JRRUW-105 (Imported)",
+                "qty": "1000",
+                "rate": "10.95",
+                "amount": "10950"
+            },
+            {
+                "name": "Office Envelop Printing - Imported Paper",
+                "description": "Size: 9.5\"x4.5\"\nPaper: JRRUW-105 (Imported)",
+                "qty": "500",
+                "rate": "22.36",
+                "amount": "11180"
+            },
+            {
+                "name": "Office Envelop Printing - Imported Paper",
+                "description": "Size: 9.5\"x4.5\"\nPaper: JRRUW-105 (Imported)",
+                "qty": "1000",
+                "rate": "14.95",
+                "amount": "14950"
+            },
+            {
+                "name": "Letterhead Printing - Standard Paper",
+                "description": "Paper: 100 GSM Alabaster",
+                "qty": "500",
+                "rate": "3.36",
+                "amount": "1680"
+            },
+            {
+                "name": "Letterhead Printing - Standard Paper",
+                "description": "Paper: 100 GSM Alabaster",
+                "qty": "1000",
+                "rate": "2.25",
+                "amount": "2248"
+            },
+            {
+                "name": "Office Envelop Printing - Standard Paper",
+                "description": "Paper: 100 GSM Alabaster",
+                "qty": "500",
+                "rate": "4.34",
+                "amount": "2170"
+            },
+            {
+                "name": "Office Envelop Printing - Standard Paper",
+                "description": "Paper: 100 GSM Alabaster",
+                "qty": "1000",
+                "rate": "2.81",
+                "amount": "2814"
+            }
+        ],
+        "discount": "",
+        "notes": "Imported paper stock cannot be guaranteed. At the time of final order, if the paper you selected is not available, we will inform you. We will also suggest an alternate paper and share its costing.",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773456495475": {
+        "quotationId": "q_1773456495475",
+        "quotationNumber": 11,
+        "date": "2026-03-14",
+        "clientId": "1769405644311wduorixo5",
+        "clientName": "SHRUSHTI CREATORS",
+        "clientAddress": "SURVEY NO-105A,H.NO-4\/1, \r\nAT-BELAVALI, BADLAPUR WEST,, THANE",
+        "subject": "Hari Shrushti Brochure Design and Print",
+        "items": [
+            {
+                "name": "Designing",
+                "description": "28 Pages Brochure Designing\nStandard design rate \u20b92,000 per page. \nDiscounted rate \u20b91,800 per page (Inclusive of 18% GST).",
+                "qty": "28",
+                "rate": "1800",
+                "amount": "50400.00"
+            },
+            {
+                "name": "Brochure Printing",
+                "description": "Size: 9\"x13\" | Pages: 28\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning\nStandard price \u20b91,17,350\/- \nDiscounted price \u20b9 1,10,000\/- (Inclusive of 18% GST).",
+                "qty": "500",
+                "rate": "220.00",
+                "amount": "110000"
+            },
+            {
+                "name": "Brochure Printing",
+                "description": "Size: 9\"x13\" | Pages: 28\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning\nStandard price \u20b91,81,500\/- \nDiscounted price \u20b9 1,70,000\/- (Inclusive of 18% GST).",
+                "qty": "1000",
+                "rate": "170.00",
+                "amount": "170000"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773457698491": {
+        "quotationId": "q_1773457698491",
+        "quotationNumber": 12,
+        "date": "2026-03-14",
+        "clientId": "1769405644311wduorixo5",
+        "clientName": "SHRUSHTI CREATORS",
+        "clientAddress": "SURVEY NO-105A,H.NO-4\/1, \r\nAT-BELAVALI, BADLAPUR WEST,, THANE",
+        "subject": "Hari Shrushti Brochure Designing & Printing",
+        "items": [
+            {
+                "name": "Brochure Designing & Printing",
+                "description": "Size: 9\"x13\" | Pages: 28\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning\nStandard price \u20b9 1,73,500\/-\nDiscounted price \u20b9 1,60,400\/- (Inclusive of 18% GST).",
+                "qty": "500",
+                "rate": "320.80",
+                "amount": "160400"
+            },
+            {
+                "name": "Brochure Designing & Printing",
+                "description": "Size: 9\"x13\" | Pages: 28\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning\nStandard price \u20b9 2,37,500\/-\nDiscounted price \u20b9 2,20,400\/- (Inclusive of 18% GST).",
+                "qty": "1000",
+                "rate": "220.40",
+                "amount": "220400"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773477495333": {
+        "quotationId": "q_1773477495333",
+        "quotationNumber": 13,
+        "date": "2026-03-14",
+        "clientId": "1769405676797tvzaftvjl",
+        "clientName": "LEELA ASSOCIATES",
+        "clientAddress": "Shop No. 01, Near Gagangiri Maharaj Ashram, Opp. Shankar Mandir,, Khopoli",
+        "subject": "Hoarding Re-Sizing and Printing",
+        "items": [
+            {
+                "name": "Hoarding 20x10 feet",
+                "description": "Re-Sizing and Printing",
+                "qty": "2",
+                "rate": "4041.50",
+                "amount": "8083"
+            },
+            {
+                "name": "Hoarding 15x8 feet",
+                "description": "",
+                "qty": 1,
+                "rate": "3127.00",
+                "amount": "3127"
+            }
+        ],
+        "discount": "",
+        "notes": "Note: GST is included in the above amount.\n",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773646778797": {
+        "quotationId": "q_1773646778797",
+        "quotationNumber": 14,
+        "date": "2026-03-16",
+        "clientName": "OM SAIRAM DEVELOPERS LLP",
+        "clientAddress": "Shop No. 115, Building 1\/2, Nagarpalika Building,, Matheran, Maharashtra",
+        "subject": "Brochure Designing and Printing - Majestic",
+        "items": [
+            {
+                "name": "Brochure Designing",
+                "description": "Pages: 16\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing",
+                "qty": "16",
+                "rate": "2000",
+                "amount": "32000.00"
+            },
+            {
+                "name": "Brochure Printing - 16 Pages (Option-1)",
+                "description": "Size: 9\"x13\" | Pages: 16\nPaper: 270 GSM (SN-MBINS270) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "300",
+                "rate": "217.53",
+                "amount": "65260"
+            },
+            {
+                "name": "Brochure Printing - 16 Pages (Option-1)",
+                "description": "Size: 9\"x13\" | Pages: 16\nPaper: 270 GSM (SN-MBINS270) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "500",
+                "rate": "171.32",
+                "amount": "85660"
+            },
+            {
+                "name": "Brochure Printing - 16 Pages (Option-1)",
+                "description": "Size: 9\"x13\" | Pages: 16\nPaper: 270 GSM (SN-MBINS270) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "1000",
+                "rate": "137.90",
+                "amount": "137900"
+            },
+            {
+                "name": "Brochure Printing - 16 Pages (Option-2)",
+                "description": "Size: 9\"x13\" | Pages: 16\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "300",
+                "rate": "181.28",
+                "amount": "54385"
+            },
+            {
+                "name": "Brochure Printing - 16 Pages (Option-2)",
+                "description": "Size: 9\"x13\" | Pages: 16\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "500",
+                "rate": "138.68",
+                "amount": "69340"
+            },
+            {
+                "name": "Brochure Printing - 16 Pages (Option-2)",
+                "description": "Size: 9\"x13\" | Pages: 16\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "1000",
+                "rate": "107.97",
+                "amount": "107975"
+            }
+        ],
+        "discount": "",
+        "notes": "Terms & Notes\nNote: Design for review will be shared with a watermark. Printing work will start after advance payment. Final files and printed material will be delivered after full payment is completed.\nPayment Terms: 50% advance. Balance 50% after design approval and before printing delivery.\n",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773648022798": {
+        "quotationId": "q_1773648022798",
+        "quotationNumber": 15,
+        "date": "2026-03-16",
+        "clientName": "OM SAIRAM DEVELOPERS LLP",
+        "clientAddress": "",
+        "subject": "Brochure Designing and Printing - Majestic",
+        "items": [
+            {
+                "name": "Brochure Designing",
+                "description": "Pages: 20\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing",
+                "qty": "20",
+                "rate": "2000",
+                "amount": "40000.00"
+            },
+            {
+                "name": "Brochure Printing - 20 Pages (Option-1)",
+                "description": "Size: 9\"x13\" | Pages: 20\nPaper: 270 GSM (SN-MBINS270) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "300",
+                "rate": "256.67",
+                "amount": "77000"
+            },
+            {
+                "name": "Brochure Printing - 20 Pages (Option-1)",
+                "description": "Size: 9\"x13\" | Pages: 20\nPaper: 270 GSM (SN-MBINS270) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "500",
+                "rate": "206.00",
+                "amount": "103000"
+            },
+            {
+                "name": "Brochure Printing - 20 Pages (Option-1)",
+                "description": "Size: 9\"x13\" | Pages: 20\nPaper: 270 GSM (SN-MBINS270) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "1000",
+                "rate": "168.38",
+                "amount": "168375"
+            },
+            {
+                "name": "Brochure Printing - 20 Pages (Option-2)",
+                "description": "Size: 9\"x13\" | Pages: 20\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "300",
+                "rate": "223.33",
+                "amount": "67000"
+            },
+            {
+                "name": "Brochure Printing - 20 Pages (Option-2)",
+                "description": "Size: 9\"x13\" | Pages: 20\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "500",
+                "rate": "170.63",
+                "amount": "85315"
+            },
+            {
+                "name": "Brochure Printing - 20 Pages (Option-2)",
+                "description": "Size: 9\"x13\" | Pages: 20\nPaper cover page: 270 GSM (SN-MBINS270) Imported\nPaper inner pages: 160 GSM (SN-MBINS160) Imported\nAll Pages Varnish\nCentral pinning",
+                "qty": "1000",
+                "rate": "132.47",
+                "amount": "132475"
+            }
+        ],
+        "discount": "",
+        "notes": "Terms & Notes\nTerms & Notes Note: Design for review will be shared with a watermark. Printing work will start after advance payment. Final files and\nprinted material will be delivered after full payment is completed. Payment Terms: 50% advance. Balance 50% after design approval and\nbefore printing delivery.",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773653295524": {
+        "quotationId": "q_1773653295524",
+        "quotationNumber": 16,
+        "date": "2026-03-16",
+        "clientName": "OM SAIRAM DEVELOPERS LLP",
+        "clientAddress": "Shop No. 115, Building 1\/2, Nagarpalika Building, , Matheran",
+        "subject": "Brochure Designing and Printing - Majestic",
+        "items": [
+            {
+                "name": "Brochure Designing and Printing Package",
+                "description": "Package includes designing and printing of a 20-page brochure.\nDesigning: Deliverables \u2013 Open editable files (Adobe Illustrator), Print-ready PDF, and files for soft sharing.\n-----------\nPrinting: Size \u2013 9\" \u00d7 13\", Pages \u2013 20, Paper \u2013 270 GSM (SN-MBINS270) Imported, All pages varnish, Central pinning.",
+                "qty": "500",
+                "rate": "287.20",
+                "amount": "143600"
+            }
+        ],
+        "discount": "8600",
+        "notes": "Note: Design preview will be shared with a watermark. Printing will start after advance payment. Final files and printed material will be delivered after full payment.\nPayment Terms: 50% advance. Balance 50% before delivery. \nTaxes: GST @18% Extra",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": "",
+        "clientId": "1773655647038"
+    },
+    "q_1773732927161": {
+        "quotationId": "q_1773732927161",
+        "quotationNumber": 17,
+        "date": "2026-03-17",
+        "clientId": "1773732732098",
+        "clientName": "Vicky Digital",
+        "clientAddress": "",
+        "subject": "Brochure Printing",
+        "items": [
+            {
+                "name": "Brochure Printing",
+                "description": "Size: 9\"x13\" | Pages: 20\nPaper: 270 GSM (SN-MBINS270) Imported\nAll Pages Varnish\nCentral pinning\nDesign: Provided by the client",
+                "qty": "500",
+                "rate": "206",
+                "amount": "103000.00"
+            }
+        ],
+        "discount": "5000",
+        "notes": "Payment Terms: 50% advance. Balance 50% before delivery. If payment is made by cheque, delivery will be done after the cheque is cleared.  |  Taxes: GST @18% extra.",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773745786696": {
+        "quotationId": "q_1773745786696",
+        "quotationNumber": 18,
+        "date": "2026-03-17",
+        "clientId": "1769405531217s173oddxp",
+        "clientName": "SHELTER BUILDERS & DEVELOPERS",
+        "clientAddress": "NL-6\/9\/03, Sec-15, Nerul, Navi Mumbai",
+        "subject": "Office Envelope 9.5\"x4.5\"",
+        "items": [
+            {
+                "name": "Office Envelope 9.5\"x4.5\"",
+                "description": "Paper: 100 GSM Alabaster",
+                "qty": "500",
+                "rate": "4.34",
+                "amount": "2170"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1773745840139": {
+        "quotationId": "q_1773745840139",
+        "quotationNumber": 19,
+        "date": "2026-03-17",
+        "clientId": "1773197259826",
+        "clientName": "SHELTER BUILDERS",
+        "clientAddress": "",
+        "subject": "Letterhead Printing",
+        "items": [
+            {
+                "name": "Letterhead Designing and Printing",
+                "description": "Paper: 100 GSM Alabaster\nPrice: 2,240\/- \nDiscount: 500\/-\n-------------\nFinal 1,740\/-",
+                "qty": "200",
+                "rate": "8.70",
+                "amount": "1740"
+            },
+            {
+                "name": "Letterhead Designing and Printing (Recommended)",
+                "description": "Paper: 100 GSM Alabaster\nPrice: 2,530\/- \nDiscount: 500\/-\n-------------\nFinal 2,030\/-",
+                "qty": "500",
+                "rate": "4.06",
+                "amount": "2030"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774514996480": {
+        "quotationId": "q_1774514996480",
+        "quotationNumber": 20,
+        "date": "2026-03-26",
+        "clientId": "1769405490391mlqtspn8m",
+        "clientName": "PRAPTI ASSOCIATE",
+        "clientAddress": "Shop No. 12, Jay Jaywanti Building, Near CKT School, Sector-15A, New Panvel, Navi Mumbai",
+        "subject": "Letterhead Printing",
+        "items": [
+            {
+                "name": "Letterhead Printing - Delivery 7 days",
+                "description": "Size: A4\nPaper: 100 gsm Alabaster",
+                "qty": "500",
+                "rate": "4.62",
+                "amount": "2310"
+            },
+            {
+                "name": "Letterhead Printing - Delivery Monday 30th March 2026",
+                "description": "Size: A4\nPaper: 100 gsm Alabaster",
+                "qty": "500",
+                "rate": "5.82",
+                "amount": "2910"
+            }
+        ],
+        "discount": "",
+        "notes": "If you confirm the order today before 6 PM, we can deliver it on Monday.",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774606389828": {
+        "quotationId": "q_1774606389828",
+        "quotationNumber": 21,
+        "date": "2026-03-27",
+        "clientId": "1774604313959",
+        "clientName": "SHREE YASH HARDWARE",
+        "clientAddress": "Shop No. 3, Ground Floor,Zion Mount4,, Kamothe, Tal-Panvel, Dist-Raigad,, Maharashtra",
+        "subject": "Stationery & Main Board",
+        "items": [
+            {
+                "name": "Old Logo Receation (HD Vector Format) ",
+                "description": "",
+                "qty": 1,
+                "rate": "1500.00",
+                "amount": "1500"
+            },
+            {
+                "name": "",
+                "description": "Visiting Card Design HARDWARE",
+                "qty": 1,
+                "rate": "1000.00",
+                "amount": "1000"
+            },
+            {
+                "name": "",
+                "description": "Visiting Card Design MARKETING ",
+                "qty": 1,
+                "rate": "1000",
+                "amount": "1000.00"
+            },
+            {
+                "name": "",
+                "description": "Main Board Design (Size 9x3 ft)",
+                "qty": 1,
+                "rate": "1500.00",
+                "amount": "1500"
+            }
+        ],
+        "discount": "1000",
+        "notes": "",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774679695745": {
+        "quotationId": "q_1774679695745",
+        "quotationNumber": 22,
+        "date": "2026-03-28",
+        "clientId": "1769405531217s173oddxp",
+        "clientName": "SHELTER BUILDERS & DEVELOPERS",
+        "clientAddress": "NL-6\/9\/03, Sec-15, Nerul, Navi Mumbai",
+        "subject": "Plastic Folder",
+        "items": [
+            {
+                "name": "Plastic Folder",
+                "description": "Screen Printing One Color\nSize : Full scape\nProduct Code : T ",
+                "qty": "500",
+                "rate": "12.5",
+                "amount": "6250.00"
+            }
+        ],
+        "discount": "",
+        "notes": "",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774694463831": {
+        "quotationId": "q_1774694463831",
+        "quotationNumber": 23,
+        "date": "2026-03-28",
+        "clientId": "1774698454366",
+        "clientName": "Jayashree Groups & Company",
+        "clientAddress": "",
+        "subject": "Acrylic Letters Board & Reception Space Glass Work",
+        "items": [
+            {
+                "name": " Acrylic Board, Acrylic Letters & Reception Space Glass Work",
+                "description": "i) Acrylic Marathi Sign Board\nii) Reception Glass Branding with Acrylic Letters, Warm Reverse LED Backlighting, Complete Fitting & Installation\niii) Acrylic Letters with Logo on Large Acrylic Panel, Company Name & Services Cutwork, Complete Fitting & Installation\niv) Hanuman Photo Frame with Acrylic LED Light Box",
+                "qty": 1,
+                "rate": "95000.00",
+                "amount": "95000.00"
+            }
+        ],
+        "discount": "",
+        "notes": "Price: Including GST | \nPayment Terms: \u20b9 60,000\/- advance with work order. \u20b9 20,000\/- before installation when material is delivered at site. Balance \u20b9 15,000\/- after completion of work.\n",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774866589138": {
+        "quotationId": "q_1774866589138",
+        "quotationNumber": 24,
+        "date": "2026-03-30",
+        "clientId": "1774866249817",
+        "clientName": "Prop Kingdom",
+        "clientAddress": "No. 69, Sector 21, Kharghar, , Navi Mumbai",
+        "subject": "Logo and Visiting Card",
+        "items": [
+            {
+                "name": "Logo Designing - Standard",
+                "description": "\u2022 3 logo options in one selected style\n\u2022 Finalise any one option\n\u2022 No additional concepts included\n\u2022 Only colour and font changes allowed (no concept changes)\n\u2022 Includes 2 revisions",
+                "qty": 1,
+                "rate": "3500",
+                "amount": "3500.00"
+            },
+            {
+                "name": "Logo Designing - Premium",
+                "description": "\u2022 3 initial logo options\n\u2022 Option to combine two styles (e.g., Wordmark + Symbol, Combination Mark, etc.)\n\u2022 Additional concepts can be created based on feedback and references\n\u2022 Includes 3\u20134 revisions\n\u2022 Logo pricing mentioned in this quotation is tentative. The cost of logo design typically ranges between \u20b98,500\/- to \u20b915,000\/-. The final price will be confirmed after receiving your complete inputs, brief, and reference logos\/images.",
+                "qty": 1,
+                "rate": "8500",
+                "amount": "8500.00"
+            }
+        ],
+        "discount": "",
+        "notes": "Note: Design for review will be shared with a watermark. Final files will be delivered after payment is completed. Payment Terms: 50% advance. Balance 50% after design approval and before delivery.\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF\nTypes of Logos We Offer:\nWordmark, Lettermark, Emblem, Icon\/Symbol, Combination Mark, Abstract Mark, and Minimal Logos.\nTo understand these logo types, please visit:\nhttps:\/\/shemoil.com\/logotypes\/",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774866968292": {
+        "quotationId": "q_1774866968292",
+        "quotationNumber": 25,
+        "date": "2026-03-30",
+        "clientId": "1774866249817",
+        "clientName": "Prop Kingdom",
+        "clientAddress": "No. 69, Sector 21, Kharghar, , Navi Mumbai",
+        "subject": "Visiting Card Design and Printing",
+        "items": [
+            {
+                "name": "Visiting Card Design",
+                "description": "2 Options",
+                "qty": 1,
+                "rate": "1000",
+                "amount": "1000.00"
+            },
+            {
+                "name": "Visiting Card Printing",
+                "description": "",
+                "qty": "500",
+                "rate": "4.55",
+                "amount": "2275"
+            },
+            {
+                "name": "Visiting Card Printing",
+                "description": "",
+                "qty": "1000",
+                "rate": "3.20",
+                "amount": "3200"
+            }
+        ],
+        "discount": "",
+        "notes": "Note: Design for review will be shared with a watermark. Final files will be delivered after payment is completed. Payment Terms: 50% advance. Balance 50% after design approval and before delivery.\nDeliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774940960210": {
+        "quotationId": "q_1774940960210",
+        "quotationNumber": 26,
+        "date": "2026-03-31",
+        "clientId": "1774940888312",
+        "clientName": "Sunrise Global School & JR College",
+        "clientAddress": "",
+        "subject": "School Handbook Design and Printing",
+        "items": [
+            {
+                "name": "Handbook Design and DTP",
+                "description": "Cover design + approx. 40 inner pages layout",
+                "qty": 1,
+                "rate": "10200.00",
+                "amount": "10200"
+            },
+            {
+                "name": "Handbook Printing",
+                "description": "Cover: Multi-colour\nInner pages: Black & White\nTotal pages: 160 (approx.)\n\u2013 40 pages (different content)\n\u2013 120 pages (single repeated design)",
+                "qty": "1000",
+                "rate": "53.70",
+                "amount": "53700"
+            }
+        ],
+        "discount": "",
+        "notes": "GST @ 18% Extra",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774950536136": {
+        "quotationId": "q_1774950536136",
+        "quotationNumber": 27,
+        "date": "2026-03-31",
+        "clientId": "17694058111979kam0f14z",
+        "clientName": "SANDEEP GUNDAJI SAWANT",
+        "clientAddress": "34A, Bhoomi Landmark, Khandeshwar Station Road, Navi Mumbai, Raigad, Maharashtra",
+        "subject": "Brochure Designing and Printing",
+        "items": [
+            {
+                "name": "Brochure Designing and Printing Package",
+                "description": "Project: Vitthal Dham\nPages: 16 (Faces)\nSize: 13\"x9\"\nPaper: Premium Fine Paper\nGSM: 270\nFinish: All Pages Varnish",
+                "qty": "1000",
+                "rate": "171.75",
+                "amount": "171755"
+            }
+        ],
+        "discount": "",
+        "notes": "Price GST Inclusive | Payment Terms: 50% Advance with proper work order and remaining 50% before delivery. ",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1774963613597": {
+        "quotationId": "q_1774963613597",
+        "quotationNumber": 28,
+        "date": "2026-03-31",
+        "clientId": "1772265117179",
+        "clientName": "ALTAMONTT REALTY LLP",
+        "clientAddress": "Office No. 811, Shelton Sapphire, Plot No. 18,19, Sector-15, CBD Belapur,, Navi Mumbai",
+        "subject": "Brochure Printing",
+        "items": [
+            {
+                "name": "Brochure Printing - Imported Paper",
+                "description": "Project: Altamontt One\nPages: 12 (Faces)\nSize: 13\"x9\"\nPaper: Premium Fine Paper\nGSM: 270\nFinish: All Pages Varnish",
+                "qty": "200",
+                "rate": "206.47",
+                "amount": "41295"
+            },
+            {
+                "name": "Brochure Printing - Imported Paper",
+                "description": "Project: Altamontt One\nPages: 12 (Faces)\nSize: 13\"x9\"\nPaper: Premium Fine Paper\nGSM: 270\nFinish: All Pages Varnish",
+                "qty": "500",
+                "rate": "128.49",
+                "amount": "64245"
+            },
+            {
+                "name": "Brochure Printing - Indian Paper",
+                "description": "Project: Altamontt One\nPages: 12 (Faces)\nSize: 13\"x9\"\nPaper: Indian Art Card\nGSM: 300\nFinish: Cover Page Matt Laminated",
+                "qty": "200",
+                "rate": "134.55",
+                "amount": "26910"
+            },
+            {
+                "name": "Brochure Printing - Indian Paper",
+                "description": "Project: Altamontt One\nPages: 12 (Faces)\nSize: 13\"x9\"\nPaper: Indian Art Card\nGSM: 300\nFinish: Cover Page Matt Laminated",
+                "qty": "500",
+                "rate": "70.47",
+                "amount": "35235"
+            }
+        ],
+        "discount": "",
+        "notes": "Price GST Inclusive | \nPayment Terms: 50% Advance with proper work order and remaining 50% before delivery. | The quotation is based on offset printing. Delivery time is 8\u201310 working days. Digital printing can be done in 3\u20134 days, but varnish will not be available, and the brochure size will be approx. 12\" \u00d7 8.4\".\n",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1775015596711": {
+        "quotationId": "q_1775015596711",
+        "quotationNumber": 29,
+        "date": "2026-04-01",
+        "clientId": "1775015491119",
+        "clientName": "Mr. Saud Siddiqui",
+        "clientAddress": "Taloja, Navi Mumbai",
+        "subject": "Real Estate Project Launch Kit",
+        "items": [
+            {
+                "name": "Real Estate Project Launch Kit - Option - 1",
+                "description": "Project Includes:\nProject Logo (Olive Residency)\nCompany Logo (Black Pearl)\nBrochure Design & Print (12 Pages \u2013 500 Qty) Imported Paper\nProject Micro Site\nLetterhead (A4 Thick Paper)\nSite Wall Branding (Design Only)\nPackage Cost: \u20b91,38,244\/-\nDiscount: \u20b913,444\/-\nFinal Amount: \u20b91,24,800\/-",
+                "qty": 1,
+                "rate": "124800.00",
+                "amount": "124800"
+            },
+            {
+                "name": "Real Estate Project Launch Kit - Option - 2",
+                "description": "Project Includes:\nProject Logo (Olive Residency)\nCompany Logo (Black Pearl)\nBrochure Design & Print (12 Pages \u2013 1000 Qty) Imported Paper\nProject Micro Site\nLetterhead (A4 Thick Paper)\nSite Wall Branding (Design Only)\nPackage Cost: \u20b91,77,424\/-\nDiscount: \u20b917,724\/-\nFinal Amount: \u20b91,60,000\/-",
+                "qty": 1,
+                "rate": "160000.00",
+                "amount": "160000"
+            }
+        ],
+        "discount": "",
+        "notes": "GST Extra | Payment Terms: 50% Advance with formal work order and remaining 50% before delivery.",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1775022418374": {
+        "quotationId": "q_1775022418374",
+        "quotationNumber": 30,
+        "date": "2026-04-01",
+        "clientId": "1775022360222",
+        "clientName": "STHAVIYAA INFRAWORKS",
+        "clientAddress": "",
+        "subject": "Logo Designing",
+        "items": [
+            {
+                "name": "Logo Designing - Standard",
+                "description": "\u2022 2 logo options in one selected style\n\u2022 Finalise any one option\n\u2022 No additional concepts included\n\u2022 Only colour and font changes allowed (no concept changes)\n\u2022 Includes 2 revisions",
+                "qty": 1,
+                "rate": "3500.00",
+                "amount": "3500"
+            },
+            {
+                "name": "Logo Designing - Premium",
+                "description": "\u2022 3 initial logo options\n\u2022 Option to combine two styles (e.g., Wordmark + Symbol, Combination Mark, etc.)\n\u2022 Additional concepts can be created based on feedback and references\n\u2022 Includes 3\u20134 revisions\n\u2022 Logo pricing mentioned in this quotation is tentative. The cost of logo design typically ranges between \u20b98,500\/- to \u20b915,000\/-. The final price will be confirmed after receiving your complete inputs, brief, and reference logos\/images.",
+                "qty": 1,
+                "rate": "8500.00",
+                "amount": "8500"
+            },
+            {
+                "name": "Visiting Card & Letterhead Design",
+                "description": "",
+                "qty": 1,
+                "rate": "1500",
+                "amount": "1500.00"
+            },
+            {
+                "name": "Visiting Card Printing ",
+                "description": "",
+                "qty": "500",
+                "rate": "4.55",
+                "amount": "2275"
+            },
+            {
+                "name": "Visiting Card Printing",
+                "description": "",
+                "qty": "1000",
+                "rate": "3.20",
+                "amount": "3200"
+            },
+            {
+                "name": "Letterhead Printing",
+                "description": "",
+                "qty": "500",
+                "rate": "3.36",
+                "amount": "1680"
+            },
+            {
+                "name": "Letterhead Printing",
+                "description": "",
+                "qty": "1000",
+                "rate": "2.25",
+                "amount": "2250"
+            }
+        ],
+        "discount": "",
+        "notes": "Note: Design for review will be shared with a watermark. Final files will be delivered after payment is completed.\nPayment Terms: 50% advance. Balance 50% after design approval and before delivery. Deliverables: Open files (Adobe Illustrator), Print PDF, Soft sharing PDF Types of Logos We Offer: Wordmark, Lettermark, Emblem, Icon\/Symbol, Combination Mark, Abstract Mark, and Minimal Logos. To understand these logo types, please visit:\nhttps:\/\/shemoil.com\/logotypes\/ | GST Extra",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1775022834880": {
+        "quotationId": "q_1775022834880",
+        "quotationNumber": 31,
+        "date": "2026-04-01",
+        "clientId": "1775022752899",
+        "clientName": "Mr. Ram Bhagyavant",
+        "clientAddress": "",
+        "subject": "Brochure Designing and Printing",
+        "items": [
+            {
+                "name": "Brochure Designing",
+                "description": "",
+                "qty": "1",
+                "rate": "16000.00",
+                "amount": "16000"
+            },
+            {
+                "name": "Brochure Printing",
+                "description": "Size: 9\"\u00d713\" | Pages: 8\nPaper: 350 GSM Indian Art Card\nCover Page Matt or Gloss Laminated\nCentral pinning",
+                "qty": "100",
+                "rate": "169.00",
+                "amount": "16900"
+            },
+            {
+                "name": "Brochure Printing",
+                "description": "Size: 9\"\u00d713\" | Pages: 8\nPaper: 350 GSM Indian Art Card\nCover Page Matt or Gloss Laminated\nCentral pinning",
+                "qty": "300",
+                "rate": "71.30",
+                "amount": "21390"
+            },
+            {
+                "name": "Brochure Printing",
+                "description": "Size: 9\"\u00d713\" | Pages: 8\nPaper: 350 GSM Indian Art Card\nCover Page Matt or Gloss Laminated\nCentral pinning",
+                "qty": "500",
+                "rate": "51.80",
+                "amount": "25900"
+            },
+            {
+                "name": "Project Micro Site - Essential for Digital Marketing",
+                "description": "",
+                "qty": 1,
+                "rate": "9999.00",
+                "amount": "9999"
+            }
+        ],
+        "discount": "",
+        "notes": "Price GST @18% Included",
+        "hideTotal": true,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    },
+    "q_1775133660641": {
+        "quotationId": "q_1775133660641",
+        "quotationNumber": 32,
+        "date": "2026-04-02",
+        "clientId": "1775128610577",
+        "clientName": "Evershine Lifespace",
+        "clientAddress": "The Landmark, Office No. 806, , Navi Mumbai, Maharashtra",
+        "subject": "Challan and Voucher",
+        "items": [
+            {
+                "name": "Delivery Challan 1+2 ",
+                "description": "Delivery Challan Book Specifications\nSize: A4\nPrinting: Mini Offset\nColours:\n\u2022 1st Copy \u2013 2 Colour\n\u2022 2nd & 3rd Copy \u2013 Black\nPaper Quality:\n\u2022 1st Copy \u2013 70 GSM\n\u2022 2nd & 3rd Copy \u2013 58 GSM\nNumber of Pages: 50 Pages per Book",
+                "qty": "20",
+                "rate": "220.00",
+                "amount": "4400"
+            },
+            {
+                "name": "Delivery Challan & Vcouher DTP",
+                "description": "",
+                "qty": "2",
+                "rate": "500.00",
+                "amount": "1000"
+            },
+            {
+                "name": "Voucher Printing",
+                "description": "Voucher Pad Specifications\nSize: A5\nPrinting: Mini Offset\nColours: Black\nPaper Quality: 70 GSM\nNumber of Pages: 50 Pages per Pad",
+                "qty": "20",
+                "rate": "67.50",
+                "amount": "1350"
+            }
+        ],
+        "discount": "",
+        "notes": "GST @ 18% Extra",
+        "hideTotal": false,
+        "manualClient": false,
+        "fromLead": false,
+        "leadId": ""
+    }
+}
