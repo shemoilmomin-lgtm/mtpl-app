@@ -1179,6 +1179,16 @@ function OrderForm({ order, clients, users, quotations, token, currentUser, onSa
   const [form, setForm] = useState(initialState)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [nextJobId, setNextJobId] = useState('')
+
+  useEffect(() => {
+    if (!isEdit) {
+      fetch('/api/orders/next-id', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(d => { if (d.job_id) setNextJobId(d.job_id) })
+        .catch(() => {})
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     localStorage.setItem(draftKey, JSON.stringify(form))
@@ -1241,11 +1251,15 @@ function OrderForm({ order, clients, users, quotations, token, currentUser, onSa
             <h2 className="text-sm font-semibold text-foreground">
               {isEdit ? 'Edit Order' : 'New Order'}
             </h2>
-            {isEdit && (
+            {isEdit ? (
               <p className="text-xs text-muted-foreground mt-0.5">
                 #{order.job_id} · {formatDate(order.date)}
               </p>
-            )}
+            ) : nextJobId ? (
+              <p className="text-xs text-muted-foreground mt-0.5 font-mono">
+                #{nextJobId}
+              </p>
+            ) : null}
           </div>
           <button
             onClick={onClose}

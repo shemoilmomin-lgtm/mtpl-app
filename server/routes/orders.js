@@ -5,6 +5,29 @@ const authenticate = require("../middleware/auth");
 const logActivity = require("../helpers/logActivity");
 const { buildDiff } = require("../helpers/logActivity");
 
+// Generate next job_id: YYYYMMDD-xxx where xxx is global max sequence + 1
+async function nextJobId() {
+  const today = new Date();
+  const datePart = today.toISOString().slice(0, 10).replace(/-/g, "");
+  const result = await pool.query(
+    `SELECT MAX(CAST(SPLIT_PART(job_id, '-', 2) AS INTEGER)) AS max_seq
+     FROM orders
+     WHERE job_id LIKE '%-%'`
+  );
+  const maxSeq = parseInt(result.rows[0].max_seq) || 0;
+  return `${datePart}-${String(maxSeq + 1).padStart(3, "0")}`;
+}
+
+// Preview next job_id (for the create form)
+router.get("/next-id", authenticate, async (req, res) => {
+  try {
+    res.json({ job_id: await nextJobId() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Get trashed orders (superadmin only)
 router.get("/trashed", authenticate, async (req, res) => {
   if (req.user.role !== "superadmin") return res.status(403).json({ error: "Forbidden" });
@@ -159,13 +182,7 @@ router.post("/save", authenticate, async (req, res) => {
       await logActivity({ userId: req.user.id, action: "edited", entityType: "order", entityId: id, entityLabel: job_id, message: allChanges || 'Saved with no changes' });
       res.json({ success: true });
     } else {
-      const today = new Date();
-      const datePart = today.toISOString().slice(0, 10).replace(/-/g, "");
-      const countResult = await pool.query(
-        "SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURRENT_DATE"
-      );
-      const count = parseInt(countResult.rows[0].count) + 1;
-      const job_id = `${datePart}-${String(count).padStart(3, "0")}`;
+      const job_id = await nextJobId();
 
       const result = await pool.query(
         `INSERT INTO orders (
@@ -211,13 +228,7 @@ router.post("/duplicate/:id", authenticate, async (req, res) => {
 
     const o = original.rows[0];
 
-    const today = new Date();
-    const datePart = today.toISOString().slice(0, 10).replace(/-/g, "");
-    const countResult = await pool.query(
-      "SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURRENT_DATE"
-    );
-    const count = parseInt(countResult.rows[0].count) + 1;
-    const job_id = `${datePart}-${String(count).padStart(3, "0")}`;
+    const job_id = await nextJobId();
 
     const result = await pool.query(
       `INSERT INTO orders (

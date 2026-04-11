@@ -1089,7 +1089,7 @@ function Tasks({ tab = 'all' }) {
       setDrawerOpen(true)
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <p className="text-muted-foreground text-sm">Loading…</p>
 
