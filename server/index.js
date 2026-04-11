@@ -16,6 +16,7 @@ const remindersRouter = require('./routes/reminders');
 const notificationsRouter = require('./routes/notifications');
 const activityRouter = require('./routes/activity');
 const settingsRouter = require('./routes/settings');
+const presenceRouter = require('./routes/presence');
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/reminders', remindersRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/activity', activityRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/presence', presenceRouter);
 
 app.get('/', async (req, res) => {
   try {

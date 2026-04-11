@@ -36,14 +36,23 @@ CREATE TABLE quotations (
   quotation_id VARCHAR(20) UNIQUE NOT NULL,
   date DATE NOT NULL DEFAULT CURRENT_DATE,
   client_id INTEGER REFERENCES clients(id),
+  subject TEXT,
   tax_mode VARCHAR(20) CHECK (tax_mode IN ('inclusive', 'exclusive')) DEFAULT 'exclusive',
   show_tax_details BOOLEAN DEFAULT TRUE,
   terms_and_conditions TEXT,
   signature_block BOOLEAN DEFAULT TRUE,
+  discount_type VARCHAR(20) DEFAULT 'fixed',
+  discount_amount NUMERIC(10,2) DEFAULT 0,
+  notes TEXT,
   order_id INTEGER, -- FK added after orders table is created
   lead_id INTEGER,  -- FK added after leads table is created
   created_by INTEGER REFERENCES users(id),
-  created_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW(),
+  manual_client_name TEXT,
+  manual_client_address TEXT,
+  manual_client_phone TEXT,
+  manual_client_email TEXT,
+  is_archived BOOLEAN DEFAULT FALSE
 );
 
 -- ─────────────────────────────────────────
@@ -52,6 +61,7 @@ CREATE TABLE quotations (
 CREATE TABLE quotation_items (
   id SERIAL PRIMARY KEY,
   quotation_id INTEGER REFERENCES quotations(id) ON DELETE CASCADE,
+  item_name TEXT,
   description TEXT,
   quantity NUMERIC(10,2),
   rate NUMERIC(10,2),
@@ -115,6 +125,7 @@ CREATE TABLE tasks (
   order_id INTEGER REFERENCES orders(id),
   status VARCHAR(20) CHECK (status IN ('open', 'completed')) DEFAULT 'open',
   sort_order INTEGER DEFAULT 0,
+  is_archived BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -170,6 +181,7 @@ CREATE TABLE leads (
   status VARCHAR(50) DEFAULT 'open',
   order_id INTEGER REFERENCES orders(id),
   converted_client_id INTEGER REFERENCES clients(id),
+  is_archived BOOLEAN DEFAULT FALSE,
   is_deleted BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -194,8 +206,10 @@ CREATE TABLE lead_quotations (
 -- ─────────────────────────────────────────
 CREATE TABLE activity_logs (
   id SERIAL PRIMARY KEY,
-  entity_type VARCHAR(20) CHECK (entity_type IN ('order', 'client', 'lead', 'app')),
+  entity_type VARCHAR(20),
   entity_id INTEGER,
+  entity_label VARCHAR(100),
+  action VARCHAR(50),
   user_id INTEGER REFERENCES users(id),
   message TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
@@ -235,3 +249,13 @@ CREATE TABLE settings (
   value TEXT,
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- ─────────────────────────────────────────
+-- MIGRATIONS (run if tables already exist)
+-- ─────────────────────────────────────────
+-- ALTER TABLE quotations ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT FALSE;
+-- ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT FALSE;
+-- ALTER TABLE leads ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT FALSE;
+-- ALTER TABLE activity_logs DROP CONSTRAINT IF EXISTS activity_logs_entity_type_check;
+-- ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS action VARCHAR(50);
+-- ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS entity_label VARCHAR(100);
