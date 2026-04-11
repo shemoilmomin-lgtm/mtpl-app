@@ -3,6 +3,41 @@ const router = express.Router();
 const pool = require("../config/db");
 const authenticate = require("../middleware/auth");
 const logActivity = require("../helpers/logActivity");
+const jwt = require("jsonwebtoken");
+const { addClient, removeClient, pushToUser } = require("../config/sseClients");
+
+// SSE stream — client connects here to receive live comment pushes
+router.get("/stream", (req, res) => {
+  const token = req.query.token;
+  if (!token) return res.status(401).end();
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return res.status(403).end();
+  }
+  const userId = decoded.id;
+
+  res.set({
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    "Connection": "keep-alive",
+    "X-Accel-Buffering": "no",
+  });
+  res.flushHeaders();
+  res.write(": connected\n\n");
+
+  addClient(userId, res);
+
+  const heartbeat = setInterval(() => {
+    try { res.write(": ping\n\n") } catch {}
+  }, 25000);
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    removeClient(userId, res);
+  });
+});
 
 // Feed: comments mentioning the user OR on orders/tasks they're currently assigned to
 router.get("/feed", authenticate, async (req, res) => {
@@ -78,13 +113,82 @@ router.post("/save", authenticate, async (req, res) => {
       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
       [entity_type, entity_id, user_id, message, parent_id || null]
     );
+    const comment = result.rows[0];
     await logActivity({ userId: user_id, action: "commented", entityType: entity_type, entityId: entity_id });
-    res.json(result.rows[0]);
+
+    // Push live update to affected users
+    pushCommentToAffectedUsers(comment, entity_type, entity_id, user_id, message).catch(() => {});
+
+    res.json(comment);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
+async function pushCommentToAffectedUsers(comment, entity_type, entity_id, user_id, message) {
+  // Gather target user IDs: mentioned users + entity assignees, excluding the commenter
+  const targetIds = new Set();
+
+  // 1. Assignees of the entity
+  if (entity_type === "order") {
+    const r = await pool.query(
+      "SELECT user_id FROM order_assignees WHERE order_id = $1", [entity_id]
+    );
+    r.rows.forEach(row => targetIds.add(row.user_id));
+  } else if (entity_type === "task") {
+    const r = await pool.query(
+      "SELECT user_id FROM task_assignees WHERE task_id = $1", [entity_id]
+    );
+    r.rows.forEach(row => targetIds.add(row.user_id));
+  }
+
+  // 2. Mentioned users by @name
+  const mentionMatches = message.match(/@([^@\s,]+(?:\s[^@\s,]+)*)/g) || [];
+  const mentionedUserIds = new Set();
+  if (mentionMatches.length) {
+    const names = mentionMatches.map(m => m.slice(1).trim());
+    const r = await pool.query("SELECT id FROM users WHERE name = ANY($1)", [names]);
+    r.rows.forEach(row => {
+      targetIds.add(row.id);
+      mentionedUserIds.add(row.id);
+    });
+  }
+
+  targetIds.delete(user_id); // don't push to the commenter
+  if (!targetIds.size) return;
+
+  // Build the enriched payload matching the feed query shape
+  const authorRow = await pool.query("SELECT name FROM users WHERE id = $1", [user_id]);
+  const author_name = authorRow.rows[0]?.name || "";
+
+  let entity_label = null;
+  if (entity_type === "order") {
+    const r = await pool.query("SELECT job_id FROM orders WHERE id = $1", [entity_id]);
+    entity_label = r.rows[0]?.job_id || null;
+  } else if (entity_type === "task") {
+    const r = await pool.query("SELECT title FROM tasks WHERE id = $1", [entity_id]);
+    entity_label = r.rows[0]?.title || null;
+  } else if (entity_type === "quotation") {
+    const r = await pool.query("SELECT quotation_id FROM quotations WHERE id = $1", [entity_id]);
+    entity_label = r.rows[0]?.quotation_id || null;
+  } else if (entity_type === "client") {
+    const r = await pool.query("SELECT full_name FROM clients WHERE id = $1", [entity_id]);
+    entity_label = r.rows[0]?.full_name || null;
+  } else if (entity_type === "lead") {
+    const r = await pool.query("SELECT lead_id FROM leads WHERE id = $1", [entity_id]);
+    entity_label = r.rows[0]?.lead_id || null;
+  }
+
+  for (const uid of targetIds) {
+    pushToUser(uid, "comment", {
+      ...comment,
+      author_name,
+      entity_label,
+      feed_reason: mentionedUserIds.has(uid) ? "mention" : "assignment",
+    });
+  }
+}
 
 // Delete comment
 router.post("/delete/:id", authenticate, async (req, res) => {

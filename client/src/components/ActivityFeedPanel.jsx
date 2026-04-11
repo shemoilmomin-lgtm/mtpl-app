@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, AtSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { renderWithMentions } from '@/components/MentionInput'
@@ -38,6 +38,7 @@ export function ActivityFeedPanel({ token, onClose }) {
   const [items, setItems] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
+  const esRef = useRef(null)
 
   useEffect(() => {
     const headers = { Authorization: `Bearer ${token}` }
@@ -51,6 +52,33 @@ export function ActivityFeedPanel({ token, onClose }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
+  }, [token])
+
+  useEffect(() => {
+    if (!token) return
+
+    const es = new EventSource(`${API}/comments/stream?token=${encodeURIComponent(token)}`)
+    esRef.current = es
+
+    es.addEventListener('comment', (e) => {
+      try {
+        const comment = JSON.parse(e.data)
+        setItems(prev => {
+          // Avoid duplicates (e.g. if the user somehow sees their own comment pushed)
+          if (prev.some(item => item.id === comment.id)) return prev
+          return [comment, ...prev].slice(0, 50)
+        })
+      } catch {}
+    })
+
+    es.onerror = () => {
+      // Browser will auto-reconnect; nothing to do
+    }
+
+    return () => {
+      es.close()
+      esRef.current = null
+    }
   }, [token])
 
   return (
