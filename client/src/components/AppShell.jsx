@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ActivityFeedPanel } from '@/components/ActivityFeedPanel'
 
-const API = 'http://localhost:3001/api'
+const API = '/api'
 
 const orderRoutes = ['/orders', '/orders/all', '/orders/completed', '/orders/long-pending']
 const taskRoutes = ['/tasks', '/tasks/in-queue', '/tasks/working', '/tasks/waiting', '/tasks/done']

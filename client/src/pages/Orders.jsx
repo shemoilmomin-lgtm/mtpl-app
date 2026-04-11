@@ -29,7 +29,7 @@ import {
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
 
-const API = 'http://localhost:3001/api'
+const API = '/api'
 
 const JOB_TYPES = [
   'Brochure', 'Digital Brochure', 'Designing', 'Visiting Cards', 'Letterheads',

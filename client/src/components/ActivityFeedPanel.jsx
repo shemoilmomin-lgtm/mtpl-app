@@ -3,7 +3,7 @@ import { X, AtSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { renderWithMentions } from '@/components/MentionInput'
 
-const API = 'http://localhost:3001/api'
+const API = '/api'
 
 const ENTITY_COLORS = {
   order:     'bg-blue-500/10 text-blue-600 dark:text-blue-400',

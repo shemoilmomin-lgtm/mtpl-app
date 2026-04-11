@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
 import { downloadQuotationPDF } from '@/lib/quotationPdf.jsx'
 
-const API = 'http://localhost:3001/api'
+const API = '/api'
 const GST_RATE = 0.18
 
 function useToken() {

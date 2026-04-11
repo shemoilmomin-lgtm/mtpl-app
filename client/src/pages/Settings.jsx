@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator'
 import { Pencil, Trash2, UserPlus, Sun, Moon, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const API = 'http://localhost:3001/api'
+const API = '/api'
 
 function useToken() {
   return localStorage.getItem('mtpl_token')
