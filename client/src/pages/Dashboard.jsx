@@ -64,7 +64,7 @@ function OrdersChart({ orders }) {
   const data = MONTHS.map((month, i) => ({
     month,
     orders: orders.filter(o => {
-      const d = new Date(o.created_at)
+      const d = new Date(o.date)
       return d.getFullYear() === year && d.getMonth() === i
     }).length,
   }))
