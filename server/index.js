@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const pool = require('./config/db');
@@ -40,13 +41,10 @@ app.use('/api/activity', activityRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/presence', presenceRouter);
 
-app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ message: 'MTPL Server is running', db: result.rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3001;
