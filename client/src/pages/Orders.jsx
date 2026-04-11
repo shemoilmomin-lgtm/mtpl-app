@@ -1565,7 +1565,7 @@ function Orders({ tab = 'active' }) {
       openCreate()
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleStatusChange(order, newStatus) {
     try {
