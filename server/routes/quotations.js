@@ -177,13 +177,13 @@ router.post("/save", authenticate, async (req, res) => {
       res.json({ success: true });
     } else {
       const maxResult = await pool.query(`
-        SELECT MAX(
+        SELECT COALESCE(MAX(
           CASE
-            WHEN quotation_id LIKE 'MTPLQ-%' THEN CAST(SUBSTRING(quotation_id FROM 7) AS INTEGER)
-            WHEN quotation_id LIKE 'QT-%' THEN CAST(SUBSTRING(quotation_id FROM 4) AS INTEGER)
+            WHEN quotation_id ~* '^(MTPLQ|QT)-[0-9]+$'
+            THEN CAST(REGEXP_REPLACE(quotation_id, '^[A-Za-z]+-', '') AS INTEGER)
             ELSE 0
           END
-        ) as max_num FROM quotations
+        ), 0) as max_num FROM quotations
       `);
       const maxNum = parseInt(maxResult.rows[0].max_num) || 0;
       const quotation_id = `MTPLQ-${String(maxNum + 1).padStart(4, "0")}`;
@@ -228,13 +228,13 @@ router.post("/duplicate/:id", authenticate, async (req, res) => {
     const q = original.rows[0];
 
     const maxResult2 = await pool.query(`
-      SELECT MAX(
+      SELECT COALESCE(MAX(
         CASE
-          WHEN quotation_id LIKE 'MTPLQ-%' THEN CAST(SUBSTRING(quotation_id FROM 7) AS INTEGER)
-          WHEN quotation_id LIKE 'QT-%' THEN CAST(SUBSTRING(quotation_id FROM 4) AS INTEGER)
+          WHEN quotation_id ~* '^(MTPLQ|QT)-[0-9]+$'
+          THEN CAST(REGEXP_REPLACE(quotation_id, '^[A-Za-z]+-', '') AS INTEGER)
           ELSE 0
         END
-      ) as max_num FROM quotations
+      ), 0) as max_num FROM quotations
     `);
     const maxNum2 = parseInt(maxResult2.rows[0].max_num) || 0;
     const quotation_id = `MTPLQ-${String(maxNum2 + 1).padStart(4, "0")}`;

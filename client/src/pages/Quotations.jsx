@@ -1004,7 +1004,7 @@ function QuotationForm({ quotation, clients, users, leads = [], orders = [], tok
               ? <p className="text-xs text-muted-foreground mt-0.5">{quotation.quotation_id}</p>
               : (() => {
                   const maxNum = allQuotations.reduce((max, q) => {
-                    const m = q.quotation_id?.match(/^(?:MTPLQ-|QT-)(\d+)$/)
+                    const m = q.quotation_id?.match(/^(?:MTPLQ|QT)-(\d+)$/i)
                     return m ? Math.max(max, parseInt(m[1])) : max
                   }, 0)
                   return <p className="text-xs text-muted-foreground mt-0.5">MTPLQ-{String(maxNum + 1).padStart(4, '0')}</p>
