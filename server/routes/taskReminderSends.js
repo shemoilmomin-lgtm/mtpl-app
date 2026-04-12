@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require("../config/db");
 const authenticate = require("../middleware/auth");
 const { pushToUser } = require("../config/sseClients");
+const logActivity = require("../helpers/logActivity");
 
 // Get reminder send history for a task
 router.get("/:task_id", authenticate, async (req, res) => {
@@ -71,6 +72,14 @@ router.post("/send", authenticate, async (req, res) => {
       sent_by_name: senderName,
       sent_at: send.sent_at,
       message,
+    });
+
+    await logActivity({
+      userId: senderId,
+      action: "sent reminder",
+      entityType: "task",
+      entityId: task_id,
+      entityLabel: task.title,
     });
 
     res.json(send);

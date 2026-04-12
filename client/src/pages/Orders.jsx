@@ -610,14 +610,29 @@ function DetailsTab({ order, client, preparedByUser, quotationAmount, quotationR
             </div>
           )}
 
-          <SectionCard
-            title="Invoice Details"
-            rows={[
-              { label: 'Proforma',    value: order.proforma_invoice_number || '—', mono: true },
-              { label: 'Invoice No.', value: order.invoice_number           || '—', mono: true },
-              { label: 'Delivery',    value: formatDate(order.delivery_expected) },
-            ]}
-          />
+          <div className="flex flex-col gap-3 rounded-2xl border border-border px-4 py-3">
+            <p className="text-xs font-semibold text-muted-foreground">Invoice Details</p>
+            <InlineInvoiceField
+              label="Proforma"
+              field="proforma_invoice_number"
+              initialValue={order.proforma_invoice_number}
+              orderId={order.id}
+              token={token}
+              canEdit={isAdmin}
+            />
+            <InlineInvoiceField
+              label="Invoice No."
+              field="invoice_number"
+              initialValue={order.invoice_number}
+              orderId={order.id}
+              token={token}
+              canEdit={isAdmin}
+            />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Delivery</span>
+              <span className="text-sm text-foreground">{formatDate(order.delivery_expected)}</span>
+            </div>
+          </div>
 
           {(order.assignees?.length > 0) && (
             <div className="flex flex-col gap-2">
@@ -699,7 +714,13 @@ function CommentsTab({ order, userMap, token, currentUser }) {
   function canDeleteComment(comment) {
     if (isAdmin) return true
     if (comment.user_id !== currentUser?.id) return false
-    return (Date.now() - new Date(comment.created_at).getTime()) < 30 * 60 * 1000
+    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 30 * 60 * 1000
+  }
+
+  function canEditComment(comment) {
+    if (isAdmin) return true
+    if (comment.user_id !== currentUser?.id) return false
+    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 2 * 60 * 60 * 1000
   }
 
   async function deleteComment(id) {
@@ -709,6 +730,20 @@ function CommentsTab({ order, userMap, token, currentUser }) {
         headers: { Authorization: `Bearer ${token}` },
       })
       setComments(prev => prev.filter(c => c.id !== id))
+    } catch {}
+  }
+
+  async function editComment(id, newMessage) {
+    try {
+      const res = await fetch(`${API}/comments/edit/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ message: newMessage }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setComments(prev => prev.map(c => c.id === id ? { ...c, message: updated.message, edited_at: updated.edited_at } : c))
+      }
     } catch {}
   }
 
@@ -793,6 +828,18 @@ function CommentsTab({ order, userMap, token, currentUser }) {
     const author = userMap[comment.user_id]
     const { text, attachments } = parseMessage(comment.message)
     const canDelete = canDeleteComment(comment)
+    const canEdit = canEditComment(comment)
+    const [editing, setEditing] = useState(false)
+    const [editText, setEditText] = useState(text)
+
+    async function saveEdit() {
+      if (!editText.trim()) return
+      const attachmentPart = comment.message.match(/(\[attachment:[^\]]+\])/g)?.join(' ') || ''
+      const newMessage = editText.trim() + (attachmentPart ? '\n' + attachmentPart : '')
+      await editComment(comment.id, newMessage)
+      setEditing(false)
+    }
+
     return (
       <div className={cn(
         'rounded-xl border border-border p-3.5 flex flex-col gap-2',
@@ -805,6 +852,7 @@ function CommentsTab({ order, userMap, token, currentUser }) {
             </div>
             <span className="text-xs font-semibold text-foreground">{author?.name || 'Unknown'}</span>
             <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
+            {comment.edited_at && <span className="text-[10px] text-muted-foreground/60">(edited)</span>}
           </div>
           <div className="flex items-center gap-1">
             {!isReply && (
@@ -815,6 +863,15 @@ function CommentsTab({ order, userMap, token, currentUser }) {
               >
                 <Reply size={11} />
                 Reply
+              </button>
+            )}
+            {canEdit && !editing && (
+              <button
+                type="button"
+                onClick={() => { setEditText(text); setEditing(true) }}
+                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ml-0.5"
+              >
+                <Pencil size={11} />
               </button>
             )}
             {canDelete && (
@@ -828,12 +885,30 @@ function CommentsTab({ order, userMap, token, currentUser }) {
             )}
           </div>
         </div>
-        {text && (
-          <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>
+        {editing ? (
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={editText}
+              onChange={e => setEditText(e.target.value)}
+              className="w-full bg-input/50 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30 resize-none"
+              rows={3}
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setEditing(false)} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-muted">Cancel</button>
+              <button type="button" onClick={saveEdit} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90">Save</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {text && (
+              <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>
+            )}
+            {attachments.map((a, i) => (
+              <AttachmentChip key={i} fileName={a.fileName} displayName={a.displayName} token={token} />
+            ))}
+          </>
         )}
-        {attachments.map((a, i) => (
-          <AttachmentChip key={i} fileName={a.fileName} displayName={a.displayName} token={token} />
-        ))}
       </div>
     )
   }
@@ -989,6 +1064,56 @@ function ActivityTab({ order, userMap, token }) {
 }
 
 // ─── Order view (read-only) ───────────────────────────────────────────────────
+
+function InlineInvoiceField({ label, field, initialValue, orderId, token, canEdit }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(initialValue || '')
+  const [saving, setSaving] = useState(false)
+
+  async function save() {
+    setSaving(true)
+    try {
+      await fetch(`/api/orders/${orderId}/invoice`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ field, value }),
+      })
+    } catch {}
+    setSaving(false)
+    setEditing(false)
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
+      {editing ? (
+        <div className="flex items-center gap-2">
+          <input
+            autoFocus
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
+            className="text-sm font-mono bg-input/50 border border-border rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-ring/30 w-48"
+          />
+          <button onClick={save} disabled={saving} className="text-xs text-primary hover:underline">{saving ? '…' : 'Save'}</button>
+          <button onClick={() => setEditing(false)} className="text-xs text-muted-foreground hover:text-foreground">Cancel</button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5 group">
+          <span className="text-sm font-mono text-foreground">{value || '—'}</span>
+          {canEdit && (
+            <button
+              onClick={() => setEditing(true)}
+              className="opacity-0 group-hover:opacity-100 flex items-center justify-center size-5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            >
+              <Pencil size={11} />
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function OrderView({
   order, clientMap, users, quotations,
@@ -1623,7 +1748,20 @@ function Orders({ tab = 'active' }) {
       openCreate()
       navigate(location.pathname, { replace: true, state: {} })
     }
+    if (location.state?.openOrderId) {
+      const found = orders.find(o => o.id === location.state.openOrderId)
+      if (found) openView(found)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle openOrderId after orders have loaded
+  useEffect(() => {
+    if (location.state?.openOrderId && orders.length > 0) {
+      const found = orders.find(o => o.id === location.state.openOrderId)
+      if (found) openView(found)
+    }
+  }, [orders]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleStatusChange(order, newStatus) {
     try {

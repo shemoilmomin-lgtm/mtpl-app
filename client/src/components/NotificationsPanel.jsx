@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, CheckCheck, Trash2, UserPlus, RefreshCw, FileText, Bell, Pencil, Link } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { X, CheckCheck, Trash2, UserPlus, RefreshCw, FileText, Bell, Pencil, Link, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const API = '/api'
@@ -29,6 +30,7 @@ function formatRelativeTime(str) {
 }
 
 export function NotificationsPanel({ token, userId, onClose, onUnreadChange }) {
+  const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const esRef = useRef(null)
@@ -170,13 +172,25 @@ export function NotificationsPanel({ token, userId, onClose, onUnreadChange }) {
                         <span className="shrink-0 size-1.5 rounded-full bg-blue-500 mt-1.5" />
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 mt-1">
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                       <span className="text-[10px] text-muted-foreground">{formatRelativeTime(item.created_at)}</span>
                       {item.sender_name && (
                         <>
                           <span className="text-muted-foreground/40 text-[10px]">·</span>
                           <span className="text-[10px] text-muted-foreground">by {item.sender_name}</span>
                         </>
+                      )}
+                      {item.entity_type === 'task' && item.entity_id && (
+                        <button
+                          onClick={() => {
+                            navigate('/tasks', { state: { openTaskId: item.entity_id } })
+                            onClose?.()
+                          }}
+                          className="flex items-center gap-0.5 text-[10px] text-primary hover:underline ml-auto"
+                        >
+                          View task
+                          <ExternalLink size={9} />
+                        </button>
                       )}
                     </div>
                   </div>

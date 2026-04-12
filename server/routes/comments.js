@@ -211,6 +211,44 @@ async function pushCommentToAffectedUsers(comment, entity_type, entity_id, user_
   });
 }
 
+// Edit comment
+router.put("/edit/:id", authenticate, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM comments WHERE id=$1", [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: "Comment not found" });
+
+    const comment = result.rows[0];
+    const role = req.user.role;
+    const isAdmin = role === "admin" || role === "superadmin";
+    const isAuthor = comment.user_id === req.user.id;
+    const withinWindow = (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 2 * 60 * 60 * 1000;
+
+    if (!isAdmin && !(isAuthor && withinWindow)) {
+      return res.status(403).json({ error: "Not allowed to edit this comment" });
+    }
+
+    const { message } = req.body;
+    if (!message?.trim()) return res.status(400).json({ error: "Message required" });
+
+    const updated = await pool.query(
+      "UPDATE comments SET message=$1, edited_at=NOW() WHERE id=$2 RETURNING *",
+      [message.trim(), req.params.id]
+    );
+
+    await logActivity({
+      userId: req.user.id,
+      action: "edited comment",
+      entityType: comment.entity_type,
+      entityId: comment.entity_id,
+    });
+
+    res.json(updated.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Delete comment
 router.post("/delete/:id", authenticate, async (req, res) => {
   try {

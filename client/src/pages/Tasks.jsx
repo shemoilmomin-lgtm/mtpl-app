@@ -24,7 +24,7 @@ import {
   Plus, Search, MoreHorizontal, Check, X, Pencil, Trash2, Archive,
   AlignLeft, MessageSquare, ChevronsUpDown, GripVertical,
   Bell, ChevronLeft, ChevronRight, ChevronDown, CornerDownRight, Paperclip, Reply,
-  SendHorizonal, Clock,
+  SendHorizonal, Clock, Activity, ExternalLink,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
@@ -118,15 +118,22 @@ function UserAvatar({ name, size = 6 }) {
 }
 
 function AttachmentChip({ fileName, displayName, token }) {
+  async function handleDownload() {
+    try {
+      const res = await fetch(`${API}/attachments/download/${encodeURIComponent(fileName)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.json())
+      if (res.url) window.open(res.url, '_blank')
+    } catch {}
+  }
   return (
-    <a
-      href={`${API}/attachments/download/${fileName}`}
-      target="_blank" rel="noreferrer"
+    <button
+      onClick={handleDownload}
       className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2.5 py-1 text-xs text-foreground hover:bg-muted transition-colors w-fit"
     >
       <Paperclip size={11} className="text-muted-foreground" />
       {displayName}
-    </a>
+    </button>
   )
 }
 
@@ -335,7 +342,13 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   function canDeleteComment(comment) {
     if (isAdmin) return true
     if (comment.user_id !== currentUser?.id) return false
-    return (Date.now() - new Date(comment.created_at).getTime()) < 30 * 60 * 1000
+    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 30 * 60 * 1000
+  }
+
+  function canEditComment(comment) {
+    if (isAdmin) return true
+    if (comment.user_id !== currentUser?.id) return false
+    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 2 * 60 * 60 * 1000
   }
 
   async function deleteComment(id) {
@@ -345,6 +358,20 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
         headers: { Authorization: `Bearer ${token}` },
       })
       setComments(prev => prev.filter(c => c.id !== id))
+    } catch {}
+  }
+
+  async function editComment(id, newMessage) {
+    try {
+      const res = await fetch(`${API}/comments/edit/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ message: newMessage }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setComments(prev => prev.map(c => c.id === id ? { ...c, message: updated.message, edited_at: updated.edited_at } : c))
+      }
     } catch {}
   }
 
@@ -417,6 +444,18 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
     const author = userMap[comment.user_id]
     const { text, attachments } = parseMessage(comment.message)
     const canDelete = canDeleteComment(comment)
+    const canEdit = canEditComment(comment)
+    const [editing, setEditing] = useState(false)
+    const [editText, setEditText] = useState(text)
+
+    async function saveEdit() {
+      if (!editText.trim()) return
+      const attachmentPart = comment.message.match(/(\[attachment:[^\]]+\])/g)?.join(' ') || ''
+      const newMessage = editText.trim() + (attachmentPart ? '\n' + attachmentPart : '')
+      await editComment(comment.id, newMessage)
+      setEditing(false)
+    }
+
     return (
       <div className={cn('rounded-xl border border-border p-3.5 flex flex-col gap-2', isReply && 'bg-muted/20')}>
         <div className="flex items-center justify-between gap-2">
@@ -424,6 +463,7 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
             <UserAvatar name={author?.name} />
             <span className="text-xs font-semibold text-foreground">{author?.name || 'Unknown'}</span>
             <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
+            {comment.edited_at && <span className="text-[10px] text-muted-foreground/60">(edited)</span>}
           </div>
           <div className="flex items-center gap-1">
             {!isReply && (
@@ -432,6 +472,13 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
                 className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
                 <Reply size={11} />
                 Reply
+              </button>
+            )}
+            {canEdit && !editing && (
+              <button type="button"
+                onClick={() => { setEditText(text); setEditing(true) }}
+                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ml-0.5">
+                <Pencil size={11} />
               </button>
             )}
             {canDelete && (
@@ -443,10 +490,28 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
             )}
           </div>
         </div>
-        {text && <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>}
-        {attachments.map((a, i) => (
-          <AttachmentChip key={i} fileName={a.fileName} displayName={a.displayName} token={token} />
-        ))}
+        {editing ? (
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={editText}
+              onChange={e => setEditText(e.target.value)}
+              className="w-full bg-input/50 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30 resize-none"
+              rows={3}
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setEditing(false)} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-muted">Cancel</button>
+              <button type="button" onClick={saveEdit} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90">Save</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {text && <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>}
+            {attachments.map((a, i) => (
+              <AttachmentChip key={i} fileName={a.fileName} displayName={a.displayName} token={token} />
+            ))}
+          </>
+        )}
       </div>
     )
   }
@@ -637,10 +702,60 @@ function TaskRemindersTab({ task, userMap, token, currentUser }) {
   )
 }
 
+// ─── Task activity tab ────────────────────────────────────────────────────────
+
+function TaskActivityTab({ task, userMap, token }) {
+  const [logs, setLogs] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${API}/activity/task/${task.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.json()).then(data => {
+      setLogs(Array.isArray(data) ? data : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [task.id])
+
+  return (
+    <div className="px-6 py-5 flex flex-col gap-0">
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : logs.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No activity yet.</p>
+      ) : (
+        logs.map((log, i) => {
+          const author = userMap[log.user_id]
+          return (
+            <div key={log.id} className="flex gap-3">
+              <div className="flex flex-col items-center pt-1">
+                <div className="size-2 rounded-full bg-border shrink-0" />
+                {i < logs.length - 1 && <div className="w-px flex-1 bg-border/50 my-1" />}
+              </div>
+              <div className={cn('flex-1 min-w-0', i < logs.length - 1 ? 'pb-4' : 'pb-0')}>
+                <p className="text-sm text-foreground">{log.message}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  {author && (
+                    <>
+                      <span className="text-[10px] text-muted-foreground">{author.name}</span>
+                      <span className="text-[10px] text-muted-foreground">·</span>
+                    </>
+                  )}
+                  <span className="text-[10px] text-muted-foreground">{formatRelativeTime(log.created_at)}</span>
+                </div>
+              </div>
+            </div>
+          )
+        })
+      )}
+    </div>
+  )
+}
+
 // ─── Task view ────────────────────────────────────────────────────────────────
 
-function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onClose, onArchive, onDelete, onStatusChange, token }) {
-  const [activeTab, setActiveTab] = useState('details')
+function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onClose, onArchive, onDelete, onStatusChange, token, onOpenOrder }) {
+  const [activeTab, setActiveTab] = useState('comments')
   const [reminder, setReminder] = useState(null)
 
   useEffect(() => {
@@ -665,6 +780,7 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
     { key: 'details', label: 'Details', icon: AlignLeft },
     { key: 'comments', label: 'Comments', icon: MessageSquare },
     { key: 'reminders', label: 'Reminders', icon: Bell },
+    { key: 'activity', label: 'Activity', icon: Activity },
   ]
 
   return (
@@ -774,7 +890,14 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
                 {order && (
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Order</span>
-                    <span className="text-sm font-mono text-foreground">{order.job_id}</span>
+                    <button
+                      type="button"
+                      onClick={() => onOpenOrder?.(order)}
+                      className="flex items-center gap-1 text-sm font-mono text-primary hover:underline w-fit"
+                    >
+                      {order.job_id}
+                      <ExternalLink size={11} />
+                    </button>
                   </div>
                 )}
               </div>
@@ -806,6 +929,12 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
 
         {activeTab === 'reminders' && (
           <TaskRemindersTab task={task} userMap={userMap} token={token} currentUser={currentUser} />
+        )}
+
+        {activeTab === 'activity' && (
+          <div className="h-full overflow-y-auto">
+            <TaskActivityTab task={task} userMap={userMap} token={token} />
+          </div>
         )}
       </div>
     </div>
@@ -1259,7 +1388,22 @@ function Tasks({ tab = 'all' }) {
       setDrawerOpen(true)
       navigate(location.pathname, { replace: true, state: {} })
     }
+    if (location.state?.openTaskId) {
+      const taskId = location.state.openTaskId
+      // tasks may not be loaded yet; find after load or use effect below
+      const found = tasks.find(t => t.id === taskId)
+      if (found) { openView(found) }
+      navigate(location.pathname, { replace: true, state: {} })
+    }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle openTaskId after tasks have loaded
+  useEffect(() => {
+    if (location.state?.openTaskId && tasks.length > 0) {
+      const found = tasks.find(t => t.id === location.state.openTaskId)
+      if (found) openView(found)
+    }
+  }, [tasks]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <p className="text-muted-foreground text-sm">Loading…</p>
 
@@ -1535,6 +1679,10 @@ function Tasks({ tab = 'all' }) {
               onArchive={() => handleArchive(selectedTask)}
               onDelete={() => handleDelete(selectedTask)}
               onStatusChange={newStatus => handleStatusChange(selectedTask, newStatus)}
+              onOpenOrder={order => {
+                setDrawerOpen(false)
+                navigate('/orders', { state: { openOrderId: order.id } })
+              }}
             />
           )}
           {drawerOpen && drawerMode === 'edit' && (

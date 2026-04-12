@@ -48,6 +48,36 @@ router.get("/trashed", authenticate, async (req, res) => {
   }
 });
 
+// Inline-edit invoice numbers from view mode (admin+)
+router.patch("/:id/invoice", authenticate, async (req, res) => {
+  const { role, id: userId } = req.user;
+  if (role !== "admin" && role !== "superadmin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  const { field, value } = req.body;
+  if (!["proforma_invoice_number", "invoice_number"].includes(field)) {
+    return res.status(400).json({ error: "Invalid field" });
+  }
+  try {
+    const result = await pool.query(
+      `UPDATE orders SET ${field} = $1 WHERE id = $2 RETURNING *`,
+      [value || null, req.params.id]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: "Not found" });
+    await logActivity({
+      userId,
+      action: "edited",
+      entityType: "order",
+      entityId: Number(req.params.id),
+      message: `Updated ${field === "invoice_number" ? "Tax Invoice No." : "Proforma No."} to: ${value || "(cleared)"}`,
+    });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Get all orders with assignees
 router.get("/", authenticate, async (req, res) => {
   try {
