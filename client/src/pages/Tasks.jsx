@@ -24,6 +24,7 @@ import {
   Plus, Search, MoreHorizontal, Check, X, Pencil, Trash2, Archive,
   AlignLeft, MessageSquare, ChevronsUpDown, GripVertical,
   Bell, ChevronLeft, ChevronRight, ChevronDown, CornerDownRight, Paperclip, Reply,
+  SendHorizonal, Clock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
@@ -329,6 +330,24 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   const [pendingFile, setPendingFile] = useState(null)
   const fileInputRef = useRef(null)
 
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
+
+  function canDeleteComment(comment) {
+    if (isAdmin) return true
+    if (comment.user_id !== currentUser?.id) return false
+    return (Date.now() - new Date(comment.created_at).getTime()) < 30 * 60 * 1000
+  }
+
+  async function deleteComment(id) {
+    try {
+      await fetch(`${API}/comments/delete/${id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setComments(prev => prev.filter(c => c.id !== id))
+    } catch {}
+  }
+
   async function load() {
     try {
       const data = await fetch(`${API}/comments/task/${task.id}`, {
@@ -340,6 +359,20 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   }
 
   useEffect(() => { load() }, [task.id])
+
+  useEffect(() => {
+    if (!token) return
+    const es = new EventSource(`${API}/comments/stream?token=${encodeURIComponent(token)}`)
+    es.addEventListener('entity_comment', (e) => {
+      try {
+        const c = JSON.parse(e.data)
+        if (c.entity_type === 'task' && String(c.entity_id) === String(task.id)) {
+          setComments(prev => prev.some(x => x.id === c.id) ? prev : [c, ...prev])
+        }
+      } catch {}
+    })
+    return () => es.close()
+  }, [token, task.id])
 
   async function sendComment() {
     if (!message.trim() && !pendingFile) return
@@ -383,6 +416,7 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   function CommentCard({ comment, isReply }) {
     const author = userMap[comment.user_id]
     const { text, attachments } = parseMessage(comment.message)
+    const canDelete = canDeleteComment(comment)
     return (
       <div className={cn('rounded-xl border border-border p-3.5 flex flex-col gap-2', isReply && 'bg-muted/20')}>
         <div className="flex items-center justify-between gap-2">
@@ -391,14 +425,23 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
             <span className="text-xs font-semibold text-foreground">{author?.name || 'Unknown'}</span>
             <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
           </div>
-          {!isReply && (
-            <button type="button"
-              onClick={() => setReplyTo(replyTo?.id === comment.id ? null : comment)}
-              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
-              <Reply size={11} />
-              Reply
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {!isReply && (
+              <button type="button"
+                onClick={() => setReplyTo(replyTo?.id === comment.id ? null : comment)}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+                <Reply size={11} />
+                Reply
+              </button>
+            )}
+            {canDelete && (
+              <button type="button"
+                onClick={() => deleteComment(comment.id)}
+                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-0.5">
+                <Trash2 size={11} />
+              </button>
+            )}
+          </div>
         </div>
         {text && <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>}
         {attachments.map((a, i) => (
@@ -472,6 +515,128 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   )
 }
 
+// ─── Task reminders tab ───────────────────────────────────────────────────────
+
+function TaskRemindersTab({ task, userMap, token, currentUser }) {
+  const [sends, setSends] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [sending, setSending] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState('')
+
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
+
+  async function load() {
+    try {
+      const data = await fetch(`${API}/task-reminder-sends/${task.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.json())
+      setSends(Array.isArray(data) ? data : [])
+    } catch {}
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [task.id])
+
+  // Default selected user to first assignee
+  useEffect(() => {
+    if (task.assignees?.length > 0 && !selectedUserId) {
+      setSelectedUserId(String(task.assignees[0].id))
+    }
+  }, [task.assignees])
+
+  async function sendReminder() {
+    if (!selectedUserId) return
+    setSending(true)
+    try {
+      const res = await fetch(`${API}/task-reminder-sends/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ task_id: task.id, sent_to: Number(selectedUserId) }),
+      })
+      if (res.ok) load()
+    } catch {}
+    setSending(false)
+  }
+
+  const totalSends = sends.length
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+
+        {/* Summary */}
+        <div className="flex items-center gap-3 rounded-xl border border-border px-4 py-3">
+          <Bell size={15} className="text-muted-foreground shrink-0" />
+          <div>
+            <p className="text-xs font-medium text-foreground">
+              {totalSends === 0
+                ? 'No reminders sent yet'
+                : `${totalSends} reminder${totalSends !== 1 ? 's' : ''} sent`}
+            </p>
+          </div>
+        </div>
+
+        {/* Send reminder (admin only) */}
+        {isAdmin && task.assignees?.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-medium text-muted-foreground">Send reminder to</p>
+            <div className="flex gap-2">
+              <select
+                value={selectedUserId}
+                onChange={e => setSelectedUserId(e.target.value)}
+                className="flex-1 h-9 rounded-3xl border border-transparent bg-input/50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              >
+                {task.assignees.map(a => (
+                  <option key={a.id} value={String(a.id)}>{a.name}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={sendReminder}
+                disabled={sending || !selectedUserId}
+                className="flex items-center gap-1.5 px-3 h-9 rounded-3xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-colors shrink-0"
+              >
+                <SendHorizonal size={13} />
+                {sending ? 'Sending…' : 'Send'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!isAdmin && (
+          <p className="text-xs text-muted-foreground">Only admins can send reminders.</p>
+        )}
+
+        {task.assignees?.length === 0 && isAdmin && (
+          <p className="text-xs text-muted-foreground">No assignees on this task to remind.</p>
+        )}
+
+        {/* History */}
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : sends.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No reminders sent yet.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-medium text-muted-foreground">Reminder history</p>
+            {sends.map(s => (
+              <div key={s.id} className="flex items-start gap-3 rounded-xl border border-border px-4 py-3">
+                <Clock size={13} className="text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <p className="text-xs text-foreground">
+                    <span className="font-medium">{s.sent_by_name}</span> reminded <span className="font-medium">{s.sent_to_name}</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{formatDateTime(s.sent_at)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Task view ────────────────────────────────────────────────────────────────
 
 function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onClose, onArchive, onDelete, onStatusChange, token }) {
@@ -499,6 +664,7 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
   const tabs = [
     { key: 'details', label: 'Details', icon: AlignLeft },
     { key: 'comments', label: 'Comments', icon: MessageSquare },
+    { key: 'reminders', label: 'Reminders', icon: Bell },
   ]
 
   return (
@@ -636,6 +802,10 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
 
         {activeTab === 'comments' && (
           <TaskCommentsTab task={task} userMap={userMap} token={token} currentUser={currentUser} />
+        )}
+
+        {activeTab === 'reminders' && (
+          <TaskRemindersTab task={task} userMap={userMap} token={token} currentUser={currentUser} />
         )}
       </div>
     </div>

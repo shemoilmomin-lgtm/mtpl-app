@@ -23,4 +23,13 @@ function pushToUser(userId, eventName, data) {
   }
 }
 
-module.exports = { addClient, removeClient, pushToUser }
+function pushToAll(eventName, data) {
+  const payload = `event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`
+  for (const set of sseClients.values()) {
+    for (const res of set) {
+      try { res.write(payload) } catch {}
+    }
+  }
+}
+
+module.exports = { addClient, removeClient, pushToUser, pushToAll }

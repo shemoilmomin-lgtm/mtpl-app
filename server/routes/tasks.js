@@ -4,6 +4,22 @@ const pool = require("../config/db");
 const authenticate = require("../middleware/auth");
 const logActivity = require("../helpers/logActivity");
 const { buildDiff } = require("../helpers/logActivity");
+const { pushToUser } = require("../config/sseClients");
+
+async function pushTaskNotification(userIds, notifData, excludeUserId) {
+  const targets = userIds.filter(id => id !== excludeUserId);
+  if (!targets.length) return;
+  for (const uid of targets) {
+    try {
+      await pool.query(
+        `INSERT INTO notifications (user_id, message, entity_type, entity_id, notification_type, sender_id)
+        VALUES ($1,$2,'task',$3,$4,$5)`,
+        [uid, notifData.message, notifData.task_id, notifData.type, notifData.sender_id]
+      );
+      pushToUser(uid, "notification", { ...notifData, user_id: uid });
+    } catch {}
+  }
+}
 
 // Get trashed tasks (superadmin only)
 router.get("/trashed", authenticate, async (req, res) => {
@@ -92,6 +108,93 @@ router.post("/save", authenticate, async (req, res) => {
         { key: 'description', label: 'Description' },
       ]);
       await logActivity({ userId: req.user.id, action: "edited", entityType: "task", entityId: id, entityLabel: title, message: diff || 'Saved with no changes' });
+
+      // Notifications for changes
+      const currentAssignees = await pool.query("SELECT user_id FROM task_assignees WHERE task_id=$1", [id]);
+      const assigneeIds = currentAssignees.rows.map(r => r.user_id);
+      const affectedIds = [...new Set([...assigneeIds, old.created_by].filter(Boolean))];
+
+      if (old.title !== title) {
+        await pushTaskNotification(affectedIds, {
+          type: "title_changed",
+          task_id: id,
+          task_title: title,
+          sender_id: req.user.id,
+          message: `Task renamed from "${old.title}" to "${title}"`,
+        }, req.user.id);
+      }
+
+      if (old.status !== status) {
+        const statusLabels = { in_queue: 'In Queue', working: 'Working', waiting: 'Waiting', done: 'Done' };
+        await pushTaskNotification(affectedIds, {
+          type: "status_changed",
+          task_id: id,
+          task_title: title,
+          sender_id: req.user.id,
+          message: `Task "${title}" status changed to ${statusLabels[status] || status}`,
+          new_status: status,
+        }, req.user.id);
+      }
+
+      if (old.description !== description) {
+        await pushTaskNotification(affectedIds, {
+          type: "description_changed",
+          task_id: id,
+          task_title: title,
+          sender_id: req.user.id,
+          message: `Task "${title}" description was updated`,
+        }, req.user.id);
+      }
+
+      if (String(old.client_id ?? '') !== String(client_id ?? '')) {
+        let clientLabel = null;
+        if (client_id) {
+          const cr = await pool.query("SELECT full_name FROM clients WHERE id=$1", [client_id]);
+          clientLabel = cr.rows[0]?.full_name || null;
+        }
+        await pushTaskNotification(affectedIds, {
+          type: "linked_client_changed",
+          task_id: id,
+          task_title: title,
+          sender_id: req.user.id,
+          message: clientLabel
+            ? `Task "${title}" linked client changed to ${clientLabel}`
+            : `Task "${title}" linked client was removed`,
+        }, req.user.id);
+      }
+
+      if (String(old.order_id ?? '') !== String(order_id ?? '')) {
+        let orderLabel = null;
+        if (order_id) {
+          const or = await pool.query("SELECT job_id FROM orders WHERE id=$1", [order_id]);
+          orderLabel = or.rows[0]?.job_id || null;
+        }
+        await pushTaskNotification(affectedIds, {
+          type: "linked_order_changed",
+          task_id: id,
+          task_title: title,
+          sender_id: req.user.id,
+          message: orderLabel
+            ? `Task "${title}" linked order changed to ${orderLabel}`
+            : `Task "${title}" linked order was removed`,
+        }, req.user.id);
+      }
+
+      // Notify newly added assignees
+      if (assignees && assignees.length > 0) {
+        const oldAssigneeIds = new Set(assigneeIds);
+        const newAssigneeIds = assignees.filter(uid => !oldAssigneeIds.has(uid));
+        if (newAssigneeIds.length) {
+          await pushTaskNotification(newAssigneeIds, {
+            type: "assigned",
+            task_id: id,
+            task_title: title,
+            sender_id: req.user.id,
+            message: `You have been assigned to task "${title}"`,
+          }, req.user.id);
+        }
+      }
+
       res.json({ success: true });
     } else {
       const result = await pool.query(
@@ -110,6 +213,14 @@ router.post("/save", authenticate, async (req, res) => {
             [newTask.id, user_id]
           );
         }
+        // Notify all assignees of new task
+        await pushTaskNotification(assignees, {
+          type: "assigned",
+          task_id: newTask.id,
+          task_title: title,
+          sender_id: req.user.id,
+          message: `You have been assigned to a new task: "${title}"`,
+        }, req.user.id);
       }
 
       await logActivity({ userId: req.user.id, action: "created", entityType: "task", entityId: newTask.id, entityLabel: title });

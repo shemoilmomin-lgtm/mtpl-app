@@ -4,7 +4,7 @@ const pool = require("../config/db");
 const authenticate = require("../middleware/auth");
 const logActivity = require("../helpers/logActivity");
 const jwt = require("jsonwebtoken");
-const { addClient, removeClient, pushToUser } = require("../config/sseClients");
+const { addClient, removeClient, pushToUser, pushToAll } = require("../config/sseClients");
 
 // SSE stream — client connects here to receive live comment pushes
 router.get("/stream", (req, res) => {
@@ -72,9 +72,12 @@ router.get("/feed", authenticate, async (req, res) => {
           OR (c.entity_type = 'order' AND EXISTS (
             SELECT 1 FROM order_assignees oa WHERE oa.order_id = c.entity_id AND oa.user_id = $1
           ))
+          OR (c.entity_type = 'order' AND o.prepared_by = $1)
           OR (c.entity_type = 'task' AND EXISTS (
             SELECT 1 FROM task_assignees ta WHERE ta.task_id = c.entity_id AND ta.user_id = $1
           ))
+          OR (c.entity_type = 'task'      AND t.created_by = $1)
+          OR (c.entity_type = 'quotation' AND q.created_by = $1)
         )
       ORDER BY c.created_at DESC
       LIMIT 50`,
@@ -127,7 +130,7 @@ router.post("/save", authenticate, async (req, res) => {
 });
 
 async function pushCommentToAffectedUsers(comment, entity_type, entity_id, user_id, message) {
-  // Gather target user IDs: mentioned users + entity assignees, excluding the commenter
+  // Gather target user IDs: assignees + creators + mentioned users, excluding the commenter
   const targetIds = new Set();
 
   // 1. Assignees of the entity
@@ -143,7 +146,19 @@ async function pushCommentToAffectedUsers(comment, entity_type, entity_id, user_
     r.rows.forEach(row => targetIds.add(row.user_id));
   }
 
-  // 2. Mentioned users by @name
+  // 2. Creator of the entity
+  if (entity_type === "order") {
+    const r = await pool.query("SELECT prepared_by FROM orders WHERE id = $1", [entity_id]);
+    if (r.rows[0]?.prepared_by) targetIds.add(r.rows[0].prepared_by);
+  } else if (entity_type === "task") {
+    const r = await pool.query("SELECT created_by FROM tasks WHERE id = $1", [entity_id]);
+    if (r.rows[0]?.created_by) targetIds.add(r.rows[0].created_by);
+  } else if (entity_type === "quotation") {
+    const r = await pool.query("SELECT created_by FROM quotations WHERE id = $1", [entity_id]);
+    if (r.rows[0]?.created_by) targetIds.add(r.rows[0].created_by);
+  }
+
+  // 3. Mentioned users by @name
   const mentionMatches = message.match(/@([^@\s,]+(?:\s[^@\s,]+)*)/g) || [];
   const mentionedUserIds = new Set();
   if (mentionMatches.length) {
@@ -156,7 +171,6 @@ async function pushCommentToAffectedUsers(comment, entity_type, entity_id, user_
   }
 
   targetIds.delete(user_id); // don't push to the commenter
-  if (!targetIds.size) return;
 
   // Build the enriched payload matching the feed query shape
   const authorRow = await pool.query("SELECT name FROM users WHERE id = $1", [user_id]);
@@ -180,6 +194,7 @@ async function pushCommentToAffectedUsers(comment, entity_type, entity_id, user_
     entity_label = r.rows[0]?.lead_id || null;
   }
 
+  // Push targeted feed event to assignees/creators/mentioned users
   for (const uid of targetIds) {
     pushToUser(uid, "comment", {
       ...comment,
@@ -188,11 +203,30 @@ async function pushCommentToAffectedUsers(comment, entity_type, entity_id, user_
       feed_reason: mentionedUserIds.has(uid) ? "mention" : "assignment",
     });
   }
+
+  // Broadcast entity_comment to ALL connected users so any open record view can live-update
+  pushToAll("entity_comment", {
+    ...comment,
+    author_name,
+  });
 }
 
 // Delete comment
 router.post("/delete/:id", authenticate, async (req, res) => {
   try {
+    const result = await pool.query("SELECT * FROM comments WHERE id=$1", [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: "Comment not found" });
+
+    const comment = result.rows[0];
+    const role = req.user.role;
+    const isAdmin = role === "admin" || role === "superadmin";
+    const isAuthor = comment.user_id === req.user.id;
+    const withinWindow = (Date.now() - new Date(comment.created_at).getTime()) < 30 * 60 * 1000;
+
+    if (!isAdmin && !(isAuthor && withinWindow)) {
+      return res.status(403).json({ error: "Not allowed to delete this comment" });
+    }
+
     await pool.query("DELETE FROM comments WHERE id=$1", [req.params.id]);
     res.json({ success: true });
   } catch (err) {

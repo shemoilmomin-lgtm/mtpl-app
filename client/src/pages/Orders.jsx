@@ -694,6 +694,24 @@ function CommentsTab({ order, userMap, token, currentUser }) {
   const [pendingFile, setPendingFile] = useState(null)
   const fileInputRef = useRef(null)
 
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
+
+  function canDeleteComment(comment) {
+    if (isAdmin) return true
+    if (comment.user_id !== currentUser?.id) return false
+    return (Date.now() - new Date(comment.created_at).getTime()) < 30 * 60 * 1000
+  }
+
+  async function deleteComment(id) {
+    try {
+      await fetch(`${API}/comments/delete/${id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setComments(prev => prev.filter(c => c.id !== id))
+    } catch {}
+  }
+
   async function load() {
     try {
       const data = await fetch(`${API}/comments/order/${order.id}`, {
@@ -705,6 +723,20 @@ function CommentsTab({ order, userMap, token, currentUser }) {
   }
 
   useEffect(() => { load() }, [order.id])
+
+  useEffect(() => {
+    if (!token) return
+    const es = new EventSource(`${API}/comments/stream?token=${encodeURIComponent(token)}`)
+    es.addEventListener('entity_comment', (e) => {
+      try {
+        const c = JSON.parse(e.data)
+        if (c.entity_type === 'order' && String(c.entity_id) === String(order.id)) {
+          setComments(prev => prev.some(x => x.id === c.id) ? prev : [c, ...prev])
+        }
+      } catch {}
+    })
+    return () => es.close()
+  }, [token, order.id])
 
   async function sendComment() {
     if (!message.trim() && !pendingFile) return
@@ -760,6 +792,7 @@ function CommentsTab({ order, userMap, token, currentUser }) {
   function CommentCard({ comment, isReply }) {
     const author = userMap[comment.user_id]
     const { text, attachments } = parseMessage(comment.message)
+    const canDelete = canDeleteComment(comment)
     return (
       <div className={cn(
         'rounded-xl border border-border p-3.5 flex flex-col gap-2',
@@ -773,16 +806,27 @@ function CommentsTab({ order, userMap, token, currentUser }) {
             <span className="text-xs font-semibold text-foreground">{author?.name || 'Unknown'}</span>
             <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
           </div>
-          {!isReply && (
-            <button
-              type="button"
-              onClick={() => setReplyTo(replyTo?.id === comment.id ? null : comment)}
-              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Reply size={11} />
-              Reply
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {!isReply && (
+              <button
+                type="button"
+                onClick={() => setReplyTo(replyTo?.id === comment.id ? null : comment)}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Reply size={11} />
+                Reply
+              </button>
+            )}
+            {canDelete && (
+              <button
+                type="button"
+                onClick={() => deleteComment(comment.id)}
+                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-0.5"
+              >
+                <Trash2 size={11} />
+              </button>
+            )}
+          </div>
         </div>
         {text && (
           <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>

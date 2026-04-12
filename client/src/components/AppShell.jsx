@@ -17,6 +17,7 @@ import {
   ActivitySquare,
   ChevronRight,
   MessageSquare,
+  Bell,
   Menu,
   X,
   Plus,
@@ -31,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ActivityFeedPanel } from '@/components/ActivityFeedPanel'
+import { NotificationsPanel } from '@/components/NotificationsPanel'
 
 const API = '/api'
 
@@ -83,6 +85,8 @@ function AppShell({ children }) {
   const token = localStorage.getItem('mtpl_token')
   const [feedOpen, setFeedOpen] = useState(() => localStorage.getItem('activityFeedOpen') === 'true')
   const [unreadCount, setUnreadCount] = useState(0)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifUnread, setNotifUnread] = useState(0)
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -148,12 +152,44 @@ function AppShell({ children }) {
       .catch(() => {})
   }, [])
 
+  // Fetch unread notifications count on mount
+  useEffect(() => {
+    if (!token || !user?.id) return
+    fetch(`${API}/notifications/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(data => {
+        if (!Array.isArray(data)) return
+        setNotifUnread(data.filter(n => !n.is_read).length)
+      })
+      .catch(() => {})
+  }, [user?.id])
+
+  // Listen for live notification events to update badge
+  useEffect(() => {
+    if (!token) return
+    const es = new EventSource(`${API}/comments/stream?token=${encodeURIComponent(token)}`)
+    es.addEventListener('notification', () => {
+      if (!notifOpen) setNotifUnread(prev => prev + 1)
+    })
+    return () => es.close()
+  }, [token, notifOpen])
+
   function handleFeedToggle() {
     const opening = !feedOpen
     setFeedOpen(opening)
     if (opening) {
+      setNotifOpen(false)
       setUnreadCount(0)
       localStorage.setItem('feedLastViewed', new Date().toISOString())
+    }
+  }
+
+  function handleNotifToggle() {
+    const opening = !notifOpen
+    setNotifOpen(opening)
+    if (opening) {
+      setFeedOpen(false)
+      setNotifUnread(0)
     }
   }
 
@@ -382,6 +418,23 @@ function AppShell({ children }) {
               </span>
             )}
           </button>
+          <button
+            onClick={handleNotifToggle}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full',
+              notifOpen
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            )}
+          >
+            <Bell size={18} />
+            <span className="flex-1 text-left">Notifications</span>
+            {notifUnread > 0 && (
+              <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-semibold px-1">
+                {notifUnread}
+              </span>
+            )}
+          </button>
           <NavItem to="/settings" icon={Settings} label="Settings" />
         </div>
 
@@ -454,6 +507,17 @@ function AppShell({ children }) {
                 </span>
               )}
             </button>
+            <button
+              onClick={handleNotifToggle}
+              className="relative text-muted-foreground hover:text-foreground"
+            >
+              <Bell size={20} />
+              {notifUnread > 0 && (
+                <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-[14px] rounded-full bg-red-500 text-white text-[8px] font-semibold px-0.5">
+                  {notifUnread}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -513,6 +577,31 @@ function AppShell({ children }) {
           <ActivityFeedPanel
             token={token}
             onClose={() => setFeedOpen(false)}
+          />
+        )}
+      </div>
+
+      {/* Notifications panel */}
+      {notifOpen && (
+        <div className="fixed inset-0 z-50 md:hidden bg-card flex flex-col">
+          <NotificationsPanel
+            token={token}
+            userId={user?.id}
+            onClose={() => setNotifOpen(false)}
+            onUnreadChange={setNotifUnread}
+          />
+        </div>
+      )}
+      <div className={cn(
+        'hidden md:block shrink-0 border-l border-border bg-card overflow-hidden transition-[width] duration-200',
+        notifOpen ? 'w-80' : 'w-0'
+      )}>
+        {notifOpen && (
+          <NotificationsPanel
+            token={token}
+            userId={user?.id}
+            onClose={() => setNotifOpen(false)}
+            onUnreadChange={setNotifUnread}
           />
         )}
       </div>

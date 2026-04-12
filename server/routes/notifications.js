@@ -7,9 +7,11 @@ const authenticate = require("../middleware/auth");
 router.get("/:user_id", authenticate, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM notifications
-      WHERE user_id=$1 AND created_at >= NOW() - INTERVAL '30 days'
-      ORDER BY created_at DESC`,
+      `SELECT n.*, u.name AS sender_name
+      FROM notifications n
+      LEFT JOIN users u ON u.id = n.sender_id
+      WHERE n.user_id=$1 AND n.created_at >= NOW() - INTERVAL '30 days'
+      ORDER BY n.created_at DESC`,
       [req.params.user_id]
     );
     res.json(result.rows);
@@ -21,12 +23,12 @@ router.get("/:user_id", authenticate, async (req, res) => {
 
 // Save notification
 router.post("/save", authenticate, async (req, res) => {
-  const { user_id, message } = req.body;
+  const { user_id, message, entity_type, entity_id, notification_type, sender_id } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO notifications (user_id, message)
-      VALUES ($1,$2) RETURNING *`,
-      [user_id, message]
+      `INSERT INTO notifications (user_id, message, entity_type, entity_id, notification_type, sender_id)
+      VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [user_id, message, entity_type || null, entity_id || null, notification_type || null, sender_id || null]
     );
     res.json(result.rows[0]);
   } catch (err) {

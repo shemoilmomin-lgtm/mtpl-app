@@ -224,6 +224,20 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
 
   useEffect(() => { load() }, [lead.id])
 
+  useEffect(() => {
+    if (!token) return
+    const es = new EventSource(`/api/comments/stream?token=${encodeURIComponent(token)}`)
+    es.addEventListener('entity_comment', (e) => {
+      try {
+        const c = JSON.parse(e.data)
+        if (c.entity_type === 'lead' && String(c.entity_id) === String(lead.id)) {
+          setComments(prev => prev.some(x => x.id === c.id) ? prev : [c, ...prev])
+        }
+      } catch {}
+    })
+    return () => es.close()
+  }, [token, lead.id])
+
   async function sendComment() {
     if (!message.trim() && !pendingFile) return
     setSending(true)
