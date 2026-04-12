@@ -31,7 +31,14 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
     ? users.filter(u => u.name.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
     : []
 
+  function autoResize(el) {
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+  }
+
   function handleChange(e) {
+    autoResize(e.target)
     const val = e.target.value
     const cursor = e.target.selectionStart
     onChange(e)
@@ -92,13 +99,15 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
 
   return (
     <div className="relative flex-1">
-      <input
+      <textarea
         ref={inputRef}
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
+        rows={1}
         className={className}
+        style={{ resize: 'none', overflow: 'hidden' }}
       />
       {query !== null && filtered.length > 0 && (
         <div className="absolute bottom-full mb-1.5 left-0 w-48 bg-popover border border-border rounded-xl shadow-lg overflow-hidden z-50">
