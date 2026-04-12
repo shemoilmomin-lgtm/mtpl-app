@@ -85,6 +85,13 @@ setInterval(async () => {
         message,
       });
 
+      // Log to activity
+      await pool.query(
+        `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, entity_label, message)
+         VALUES ($1, 'reminder fired', 'task', $2, $3, $4)`,
+        [reminder.user_id, reminder.task_id, reminder.task_title, `Reminder fired for task: ${reminder.task_title}`]
+      );
+
       // Mark reminder as dismissed so it doesn't fire again
       await pool.query(
         'UPDATE reminders SET is_dismissed = true WHERE id = $1',

@@ -10,10 +10,15 @@ const pool = require('../config/db');
  * @param {string} [opts.entityLabel] - Human-readable identifier, e.g. "20240101-001", "CLT-0001"
  * @param {string} [opts.message]   - Optional extra detail
  */
+function capitalize(str) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+}
+
 async function logActivity({ userId, action, entityType, entityId, entityLabel, message }) {
   try {
     const label = entityLabel || '';
-    const msg = message || `${action} ${entityType}${label ? ' ' + label : ''}`;
+    const msg = message || `${capitalize(action)} ${entityType}${label ? ': ' + label : ''}`;
+
     await pool.query(
       `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, entity_label, message)
        VALUES ($1, $2, $3, $4, $5, $6)`,

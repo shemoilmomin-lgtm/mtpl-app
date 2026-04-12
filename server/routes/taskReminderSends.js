@@ -74,12 +74,15 @@ router.post("/send", authenticate, async (req, res) => {
       message,
     });
 
+    const recipientResult = await pool.query("SELECT name FROM users WHERE id=$1", [sent_to]);
+    const recipientName = recipientResult.rows[0]?.name || "a user";
+
     await logActivity({
       userId: senderId,
       action: "sent reminder",
       entityType: "task",
       entityId: task_id,
-      entityLabel: task.title,
+      message: `Sent a reminder to ${recipientName} for task: ${task.title}`,
     });
 
     res.json(send);

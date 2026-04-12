@@ -117,7 +117,14 @@ router.post("/save", authenticate, async (req, res) => {
       [entity_type, entity_id, user_id, message, parent_id || null]
     );
     const comment = result.rows[0];
-    await logActivity({ userId: user_id, action: "commented", entityType: entity_type, entityId: entity_id });
+    const snippet = message.replace(/\[attachment:[^\]]+\]/g, '[file]').trim().slice(0, 80)
+    await logActivity({
+      userId: user_id,
+      action: "commented",
+      entityType: entity_type,
+      entityId: entity_id,
+      message: `Added a comment: "${snippet}${message.length > 80 ? '…' : ''}"`,
+    });
 
     // Push live update to affected users
     pushCommentToAffectedUsers(comment, entity_type, entity_id, user_id, message).catch(() => {});
@@ -235,11 +242,13 @@ router.put("/edit/:id", authenticate, async (req, res) => {
       [message.trim(), req.params.id]
     );
 
+    const editSnippet = message.trim().replace(/\[attachment:[^\]]+\]/g, '[file]').slice(0, 80)
     await logActivity({
       userId: req.user.id,
       action: "edited comment",
       entityType: comment.entity_type,
       entityId: comment.entity_id,
+      message: `Edited a comment: "${editSnippet}${message.length > 80 ? '…' : ''}"`,
     });
 
     res.json(updated.rows[0]);
