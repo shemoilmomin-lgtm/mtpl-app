@@ -803,6 +803,8 @@ function Settings() {
       {activeTab === 'live' && isSuperadmin && <LiveTab token={token} />}
       {activeTab === 'feedback' && <FeedbackTab token={token} />}
       {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
+
+      <p className="text-xs text-muted-foreground/50 pt-2">Stable v3</p>
     </div>
   )
 }

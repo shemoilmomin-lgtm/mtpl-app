@@ -1964,7 +1964,7 @@ function Orders({ tab = 'active' }) {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[180px]">
                   <SelectItem value="_all">Any</SelectItem>
                   {users.map(u => (
                     <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
@@ -1980,7 +1980,7 @@ function Orders({ tab = 'active' }) {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[200px]">
                   <SelectItem value="_all">Any</SelectItem>
                   {JOB_TYPES.map(t => (
                     <SelectItem key={t} value={t}>{t}</SelectItem>
@@ -1996,7 +1996,7 @@ function Orders({ tab = 'active' }) {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[160px]">
                   <SelectItem value="_all">Any</SelectItem>
                   <SelectItem value="filled">Filled</SelectItem>
                   <SelectItem value="empty">Empty</SelectItem>
@@ -2011,7 +2011,7 @@ function Orders({ tab = 'active' }) {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[160px]">
                   <SelectItem value="_all">Any</SelectItem>
                   <SelectItem value="filled">Filled</SelectItem>
                   <SelectItem value="empty">Empty</SelectItem>
@@ -2046,7 +2046,7 @@ function Orders({ tab = 'active' }) {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[160px]">
                   <SelectItem value="job_id">Job ID</SelectItem>
                   <SelectItem value="date">Date</SelectItem>
                   <SelectItem value="status">Status</SelectItem>
@@ -2062,7 +2062,7 @@ function Orders({ tab = 'active' }) {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[160px]">
                   <SelectItem value="desc">Newest / Z-A</SelectItem>
                   <SelectItem value="asc">Oldest / A-Z</SelectItem>
                 </SelectContent>
