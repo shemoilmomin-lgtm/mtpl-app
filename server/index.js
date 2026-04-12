@@ -4,6 +4,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const pool = require('./config/db');
 
+const { pushToUser } = require('./config/sseClients');
+
 const attachmentsRouter = require('./routes/attachments');
 const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users');
@@ -53,3 +55,43 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Reminder scheduler — runs every 60 seconds
+setInterval(async () => {
+  try {
+    const due = await pool.query(
+      `SELECT r.*, t.title AS task_title
+       FROM reminders r
+       JOIN tasks t ON t.id = r.task_id
+       WHERE r.remind_at <= NOW() AND r.is_dismissed = false`
+    );
+    for (const reminder of due.rows) {
+      // Insert into notifications table
+      await pool.query(
+        `INSERT INTO notifications (user_id, message, entity_type, entity_id, notification_type)
+         VALUES ($1, $2, 'task', $3, 'reminder')`,
+        [
+          reminder.user_id,
+          `Reminder: ${reminder.task_title}`,
+          reminder.task_id,
+        ]
+      );
+
+      // Push live SSE notification
+      pushToUser(reminder.user_id, 'notification', {
+        type: 'reminder',
+        task_id: reminder.task_id,
+        task_title: reminder.task_title,
+        message: `Reminder: ${reminder.task_title}`,
+      });
+
+      // Mark reminder as dismissed so it doesn't fire again
+      await pool.query(
+        'UPDATE reminders SET is_dismissed = true WHERE id = $1',
+        [reminder.id]
+      );
+    }
+  } catch (err) {
+    console.error('Reminder scheduler error:', err);
+  }
+}, 60 * 1000);
