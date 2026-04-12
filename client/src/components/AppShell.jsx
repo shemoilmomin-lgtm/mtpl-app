@@ -288,11 +288,11 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
         {/* Logo + mobile close */}
-        <div className="px-4 py-5 flex items-center justify-between">
-          <img src="/logo.svg" alt="MTPL" className="h-6 invert dark:invert-0" />
+        <div className="px-4 py-6 flex items-center justify-center relative">
+          <img src="/logo.svg" alt="MTPL" className="h-10 invert dark:invert-0" />
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden text-muted-foreground hover:text-foreground"
+            className="md:hidden text-muted-foreground hover:text-foreground absolute right-4"
           >
             <X size={18} />
           </button>

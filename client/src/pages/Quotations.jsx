@@ -405,21 +405,17 @@ function parseMessage(msg) {
   return { text, attachments }
 }
 
-function AttachmentChip({ fileName, displayName, token }) {
-  async function handleDownload() {
-    try {
-      const res = await fetch(`${API}/attachments/download/${encodeURIComponent(fileName)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.json())
-      if (res.url) window.open(res.url, '_blank')
-    } catch {}
-  }
+function AttachmentChip({ fileName, displayName }) {
   return (
-    <button onClick={handleDownload}
-      className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground hover:bg-muted transition-colors w-fit">
+    <a
+      href={`${API}/attachments/download/${encodeURIComponent(fileName)}`}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground hover:bg-muted transition-colors w-fit"
+    >
       <Paperclip size={11} className="shrink-0 text-muted-foreground" />
       {displayName}
-    </button>
+    </a>
   )
 }
 
@@ -512,7 +508,7 @@ function CommentsTab({ entityId, userMap, token, currentUser }) {
           )}
         </div>
         {text && <p className="text-sm text-foreground whitespace-pre-wrap">{renderWithMentions(text, Object.values(userMap))}</p>}
-        {attachments.map(a => <AttachmentChip key={a.fileName} {...a} token={token} />)}
+        {attachments.map(a => <AttachmentChip key={a.fileName} fileName={a.fileName} displayName={a.displayName} />)}
       </div>
     )
   }

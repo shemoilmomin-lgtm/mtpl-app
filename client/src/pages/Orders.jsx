@@ -1956,12 +1956,12 @@ function Orders({ tab = 'active' }) {
       {/* Filter panel */}
       {filtersOpen && (
         <div className="bg-muted/30 border border-border rounded-xl p-4 flex flex-col gap-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="flex flex-wrap gap-4">
             {/* Assignee */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[180px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Assignee</label>
               <Select value={filterAssignee || '_all'} onValueChange={v => setFilterAssignee(v === '_all' ? '' : v)}>
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1974,10 +1974,10 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Job type */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[200px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Job Type</label>
               <Select value={filterJobType || '_all'} onValueChange={v => setFilterJobType(v === '_all' ? '' : v)}>
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1990,10 +1990,10 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Proforma */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Proforma</label>
               <Select value={filterProforma || '_all'} onValueChange={v => setFilterProforma(v === '_all' ? '' : v)}>
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -2005,10 +2005,10 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Tax Invoice */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Tax Invoice</label>
               <Select value={filterTaxInvoice || '_all'} onValueChange={v => setFilterTaxInvoice(v === '_all' ? '' : v)}>
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -2020,32 +2020,30 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Date from */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Date From</label>
               <Input
                 type="date"
                 value={filterDateFrom}
                 onChange={e => setFilterDateFrom(e.target.value)}
-                className="h-8 text-xs"
               />
             </div>
 
             {/* Date to */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Date To</label>
               <Input
                 type="date"
                 value={filterDateTo}
                 onChange={e => setFilterDateTo(e.target.value)}
-                className="h-8 text-xs"
               />
             </div>
 
             {/* Sort by */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Sort By</label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -2058,10 +2056,10 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Sort direction */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
               <label className="text-xs font-medium text-muted-foreground">Order</label>
               <Select value={sortDir} onValueChange={setSortDir}>
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
