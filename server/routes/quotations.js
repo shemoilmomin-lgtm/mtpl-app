@@ -176,9 +176,17 @@ router.post("/save", authenticate, async (req, res) => {
       await logActivity({ userId: req.user.id, action: "edited", entityType: "quotation", entityId: id, entityLabel: quotation_label, message: allChanges || 'Saved with no changes' });
       res.json({ success: true });
     } else {
-      const countResult = await pool.query("SELECT COUNT(*) FROM quotations");
-      const count = parseInt(countResult.rows[0].count) + 1;
-      const quotation_id = `QT-${String(count).padStart(4, "0")}`;
+      const maxResult = await pool.query(`
+        SELECT MAX(
+          CASE
+            WHEN quotation_id LIKE 'MTPLQ-%' THEN CAST(SUBSTRING(quotation_id FROM 7) AS INTEGER)
+            WHEN quotation_id LIKE 'QT-%' THEN CAST(SUBSTRING(quotation_id FROM 4) AS INTEGER)
+            ELSE 0
+          END
+        ) as max_num FROM quotations
+      `);
+      const maxNum = parseInt(maxResult.rows[0].max_num) || 0;
+      const quotation_id = `MTPLQ-${String(maxNum + 1).padStart(4, "0")}`;
 
       const result = await pool.query(
         `INSERT INTO quotations (quotation_id, client_id, date, subject, tax_mode, show_tax_details, hide_totals, terms_and_conditions, signature_block, discount_type, discount_amount, notes, created_by, manual_client_name, manual_client_address, manual_client_phone, manual_client_email, lead_id, order_id)
@@ -219,9 +227,17 @@ router.post("/duplicate/:id", authenticate, async (req, res) => {
 
     const q = original.rows[0];
 
-    const countResult = await pool.query("SELECT COUNT(*) FROM quotations");
-    const count = parseInt(countResult.rows[0].count) + 1;
-    const quotation_id = `QT-${String(count).padStart(4, "0")}`;
+    const maxResult2 = await pool.query(`
+      SELECT MAX(
+        CASE
+          WHEN quotation_id LIKE 'MTPLQ-%' THEN CAST(SUBSTRING(quotation_id FROM 7) AS INTEGER)
+          WHEN quotation_id LIKE 'QT-%' THEN CAST(SUBSTRING(quotation_id FROM 4) AS INTEGER)
+          ELSE 0
+        END
+      ) as max_num FROM quotations
+    `);
+    const maxNum2 = parseInt(maxResult2.rows[0].max_num) || 0;
+    const quotation_id = `MTPLQ-${String(maxNum2 + 1).padStart(4, "0")}`;
 
     const result = await pool.query(
       `INSERT INTO quotations (quotation_id, client_id, date, subject, tax_mode, show_tax_details, terms_and_conditions, signature_block, discount_type, discount_amount, notes, created_by, manual_client_name, manual_client_address, manual_client_phone, manual_client_email)

@@ -21,6 +21,7 @@ const activityRouter = require('./routes/activity');
 const settingsRouter = require('./routes/settings');
 const presenceRouter = require('./routes/presence');
 const taskReminderSendsRouter = require('./routes/taskReminderSends');
+const searchRouter = require('./routes/search');
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api/activity', activityRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/presence', presenceRouter);
 app.use('/api/task-reminder-sends', taskReminderSendsRouter);
+app.use('/api/search', searchRouter);
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 

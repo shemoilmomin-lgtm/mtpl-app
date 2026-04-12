@@ -21,6 +21,7 @@ import {
   Menu,
   X,
   Plus,
+  Search,
 } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ActivityFeedPanel } from '@/components/ActivityFeedPanel'
 import { NotificationsPanel } from '@/components/NotificationsPanel'
+import { GlobalSearch } from '@/components/GlobalSearch'
 
 const API = '/api'
 
@@ -89,9 +91,13 @@ function AppShell({ children }) {
   const [notifUnread, setNotifUnread] = useState(0)
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   // Close sidebar on route change (mobile)
   useEffect(() => { setSidebarOpen(false) }, [location.pathname])
+
+  // Close desktop search on route change
+  useEffect(() => { setSearchOpen(false) }, [location.pathname])
 
   const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
   const [ordersOpen, setOrdersOpen] = useState(isOnOrdersRoute)
@@ -470,6 +476,12 @@ function AppShell({ children }) {
           </button>
           <span className="text-foreground font-semibold text-base">MTPL</span>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Search size={20} />
+            </button>
             {!isSettingsPage && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -522,13 +534,30 @@ function AppShell({ children }) {
         </div>
 
         {/* Desktop content header */}
-        <div className="hidden md:flex items-center justify-between px-6 py-4 border-b border-border bg-card shrink-0">
-          <div>
+        <div className="hidden md:flex items-center gap-4 px-6 py-4 border-b border-border bg-card shrink-0">
+          <div className="shrink-0">
             <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
             {location.pathname === '/dashboard' && user?.name && (
               <p className="text-xs text-muted-foreground mt-0.5">Welcome back, {user.name.split(' ')[0]}</p>
             )}
           </div>
+          {/* Search bar */}
+          <div className="flex-1 max-w-sm relative">
+            {searchOpen ? (
+              <div className="absolute top-0 left-0 right-0 z-50 bg-card border border-border rounded-xl shadow-lg overflow-hidden max-h-[60vh] flex flex-col">
+                <GlobalSearch token={token} onClose={() => setSearchOpen(false)} />
+              </div>
+            ) : (
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg border border-border bg-muted/40 text-sm text-muted-foreground hover:bg-muted transition-colors"
+              >
+                <Search size={14} />
+                Search…
+              </button>
+            )}
+          </div>
+          <div className="ml-auto shrink-0 flex items-center">
           {!isSettingsPage && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -556,12 +585,28 @@ function AppShell({ children }) {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 sm:p-6">
           {children}
         </div>
       </main>
+
+      {/* Global search overlay — mobile full screen */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-50 md:hidden bg-card flex flex-col">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+            <span className="text-sm font-medium text-foreground">Search</span>
+            <button onClick={() => setSearchOpen(false)} className="ml-auto text-muted-foreground hover:text-foreground">
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <GlobalSearch token={token} onClose={() => setSearchOpen(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Activity feed panel — full overlay on mobile, side panel on desktop */}
       {feedOpen && (

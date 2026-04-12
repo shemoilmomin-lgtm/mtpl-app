@@ -299,7 +299,7 @@ function QuotationDocument({ quotation, client, createdByUser }) {
                 )}
                 <View style={s.totalRowFinal}>
                   <Text style={[s.totalLabel, { fontFamily: 'Helvetica-Bold', fontSize: 10, color: '#222222' }]}>Total</Text>
-                  <Text style={[s.totalValue, { fontSize: 10 }]}>{'INR '}{fmt(total)}</Text>
+                  <Text style={[s.totalValue, { fontSize: 10 }]}>{'₹'}{fmt(total)}</Text>
                 </View>
               </>
             )}

@@ -50,6 +50,12 @@
   * {
     border-color: oklch(var(--border));
   }
+  /* Prevent iOS Safari from zooming in when focusing inputs */
+  @media (max-width: 768px) {
+    input, textarea, select {
+      font-size: max(16px, 1em) !important;
+    }
+  }
   body {
     background-color: oklch(var(--background));
     color: oklch(var(--foreground));

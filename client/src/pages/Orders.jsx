@@ -2009,13 +2009,8 @@ function Orders({ tab = 'active' }) {
                     <TableCell>
                       <div className="max-w-[130px]">
                         <p className="text-sm font-medium text-foreground truncate">
-                          {client?.full_name || '—'}
+                          {client?.company_name || client?.full_name || '—'}
                         </p>
-                        {client?.company_name && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {client.company_name}
-                          </p>
-                        )}
                       </div>
                     </TableCell>
 
