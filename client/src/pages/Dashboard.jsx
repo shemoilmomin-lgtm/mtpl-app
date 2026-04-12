@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,7 +19,7 @@ function useToken() {
 }
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
-function StatCard({ label, value, sublabel, icon: Icon, accent }) {
+function StatCard({ label, value, sublabel, icon: Icon, accent, onClick }) {
   const accentMap = {
     blue:   { bg: 'bg-blue-500/10',    icon: 'text-blue-500' },
     amber:  { bg: 'bg-amber-500/10',   icon: 'text-amber-500' },
@@ -30,7 +31,10 @@ function StatCard({ label, value, sublabel, icon: Icon, accent }) {
   const { bg, icon: iconClass } = accentMap[accent] || accentMap.blue
 
   return (
-    <div className="bg-card rounded-2xl p-5 ring-1 ring-foreground/5 flex flex-col gap-3">
+    <div
+      className={cn('bg-card rounded-2xl p-5 ring-1 ring-foreground/5 flex flex-col gap-3', onClick && 'cursor-pointer hover:ring-foreground/20 transition-all')}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between">
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider leading-none">{label}</p>
         <div className={cn('p-2 rounded-xl', bg)}>
@@ -158,6 +162,7 @@ function TaskBreakdown({ tasks }) {
 
 // ─── Delivery Calendar ────────────────────────────────────────────────────────
 function DeliveryCalendar({ orders }) {
+  const navigate = useNavigate()
   const [current, setCurrent] = useState(() => {
     const now = new Date()
     return { year: now.getFullYear(), month: now.getMonth() }
@@ -228,8 +233,9 @@ function DeliveryCalendar({ orders }) {
                 {deliveryMap[day]?.slice(0, 2).map((o, j) => (
                   <div
                     key={j}
-                    className="w-full bg-primary/20 text-primary rounded px-0.5 truncate text-[9px] leading-4 text-center"
+                    className="w-full bg-primary/20 text-primary rounded px-0.5 truncate text-[9px] leading-4 text-center cursor-pointer hover:bg-primary/30 transition-colors"
                     title={o.project_name}
+                    onClick={() => navigate('/orders', { state: { openOrderId: o.id } })}
                   >
                     {o.project_name}
                   </div>
@@ -248,6 +254,7 @@ function DeliveryCalendar({ orders }) {
 
 // ─── My Tasks ─────────────────────────────────────────────────────────────────
 function MyTasks({ tasks, user }) {
+  const navigate = useNavigate()
   const myTasks = tasks.filter(
     (t) => t.status !== 'done' && t.assignees?.some((a) => a.id == user?.id)
   )
@@ -273,7 +280,11 @@ function MyTasks({ tasks, user }) {
       ) : (
         <div className="flex flex-col divide-y divide-border overflow-y-auto flex-1 max-h-64">
           {myTasks.map((t) => (
-            <div key={t.id} className="flex items-center justify-between py-2.5 gap-3">
+            <div
+              key={t.id}
+              className="flex items-center justify-between py-2.5 gap-3 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-colors"
+              onClick={() => navigate('/tasks', { state: { openTaskId: t.id } })}
+            >
               <p className="text-sm text-foreground truncate">{t.title}</p>
               <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0', statusColor[t.status])}>
                 {statusLabel[t.status]}
@@ -288,6 +299,7 @@ function MyTasks({ tasks, user }) {
 
 // ─── Recent Leads ─────────────────────────────────────────────────────────────
 function RecentLeads({ leads }) {
+  const navigate = useNavigate()
   const recent = [...leads]
     .filter((l) => !l.is_deleted)
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -314,7 +326,11 @@ function RecentLeads({ leads }) {
       ) : (
         <div className="flex flex-col divide-y divide-border flex-1 overflow-y-auto max-h-64">
           {recent.map((l) => (
-            <div key={l.id} className="flex items-center justify-between py-2.5 gap-3">
+            <div
+              key={l.id}
+              className="flex items-center justify-between py-2.5 gap-3 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-colors"
+              onClick={() => navigate('/leads', { state: { openLeadId: l.id } })}
+            >
               <div className="min-w-0">
                 <p className="text-sm text-foreground truncate">
                   {l.client_manual_name || l.job_type || '—'}
@@ -339,6 +355,7 @@ function RecentLeads({ leads }) {
 
 // ─── Recent Orders ────────────────────────────────────────────────────────────
 function RecentOrders({ orders, clients }) {
+  const navigate = useNavigate()
   const clientMap = useMemo(() => {
     const m = {}
     clients.forEach(c => { m[c.id] = c })
@@ -371,7 +388,11 @@ function RecentOrders({ orders, clients }) {
           {recent.map((o) => {
             const client = clientMap[o.client_id]
             return (
-              <div key={o.id} className="flex items-center justify-between py-2.5 gap-3">
+              <div
+                key={o.id}
+                className="flex items-center justify-between py-2.5 gap-3 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-colors"
+                onClick={() => navigate('/orders', { state: { openOrderId: o.id } })}
+              >
                 <div className="min-w-0">
                   <p className="text-sm text-foreground truncate font-medium">{o.project_name || '—'}</p>
                   <p className="text-xs text-muted-foreground truncate">
@@ -397,6 +418,7 @@ function RecentOrders({ orders, clients }) {
 function Dashboard() {
   const { user } = useAuth()
   const token = useToken()
+  const navigate = useNavigate()
   const [tasks, setTasks] = useState([])
   const [leads, setLeads] = useState([])
   const [orders, setOrders] = useState([])
@@ -444,6 +466,7 @@ function Dashboard() {
           sublabel={`${inProgress} in progress`}
           icon={CheckSquare}
           accent="blue"
+          onClick={() => navigate('/tasks')}
         />
         <StatCard
           label="In Progress"
@@ -451,6 +474,7 @@ function Dashboard() {
           sublabel="active tasks"
           icon={Activity}
           accent="amber"
+          onClick={() => navigate('/tasks')}
         />
         <StatCard
           label="Active Orders"
@@ -458,6 +482,7 @@ function Dashboard() {
           sublabel="not completed"
           icon={ShoppingBag}
           accent="violet"
+          onClick={() => navigate('/orders')}
         />
         <StatCard
           label="Open Leads"
@@ -465,6 +490,7 @@ function Dashboard() {
           sublabel="awaiting action"
           icon={TrendingUp}
           accent="green"
+          onClick={() => navigate('/leads')}
         />
         <StatCard
           label="Quotations"
@@ -472,6 +498,7 @@ function Dashboard() {
           sublabel="total active"
           icon={FileText}
           accent="orange"
+          onClick={() => navigate('/quotations')}
         />
       </div>
 

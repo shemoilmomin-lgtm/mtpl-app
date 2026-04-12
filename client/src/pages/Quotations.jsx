@@ -1336,6 +1336,8 @@ function Quotations() {
     fetchAll()
   }
 
+  const pendingOpenQuotationId = useRef(null)
+
   useEffect(() => {
     if (location.state?.openCreate) {
       setSelected(null)
@@ -1343,7 +1345,19 @@ function Quotations() {
       setDrawerOpen(true)
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, [location.state?.openCreate]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (location.state?.openQuotationId) {
+      pendingOpenQuotationId.current = location.state.openQuotationId
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (pendingOpenQuotationId.current && quotations.length > 0) {
+      const found = quotations.find(q => q.id === pendingOpenQuotationId.current)
+      if (found) { setSelected(found); setDrawerMode('view'); setDrawerOpen(true) }
+      pendingOpenQuotationId.current = null
+    }
+  }, [quotations]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <p className="text-muted-foreground text-sm">Loading…</p>
 

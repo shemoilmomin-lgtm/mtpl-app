@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
@@ -12,7 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { Pencil, Trash2, UserPlus, Sun, Moon, RefreshCw } from 'lucide-react'
+import { Pencil, Trash2, UserPlus, Sun, Moon, RefreshCw, Paperclip, X, Send, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const API = '/api'
@@ -596,6 +597,165 @@ function LiveTab({ token }) {
   )
 }
 
+// ── Feedback Tab ──────────────────────────────────────────────────────────────
+
+function FeedbackTab({ token }) {
+  const [message, setMessage] = useState('')
+  const [files, setFiles] = useState([])
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+  const fileInputRef = useRef(null)
+
+  function handleFileChange(e) {
+    const picked = Array.from(e.target.files || [])
+    setFiles(prev => {
+      const combined = [...prev, ...picked]
+      return combined.slice(0, 3)
+    })
+    e.target.value = ''
+  }
+
+  function removeFile(i) {
+    setFiles(prev => prev.filter((_, idx) => idx !== i))
+  }
+
+  async function handleSend() {
+    if (!message.trim()) return
+    setSending(true)
+    setError('')
+    try {
+      const form = new FormData()
+      form.append('message', message.trim())
+      files.forEach(f => form.append('attachments', f))
+      const res = await fetch(`${API}/feedbacks`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      })
+      if (!res.ok) throw new Error('Failed')
+      setMessage('')
+      setFiles([])
+      setSent(true)
+      setTimeout(() => setSent(false), 4000)
+    } catch {
+      setError('Could not send feedback. Try again.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-5 max-w-lg">
+      <div>
+        <p className="text-sm font-semibold text-foreground">Send Feedback</p>
+        <p className="text-xs text-muted-foreground mt-1">Share a bug, suggestion, or anything on your mind.</p>
+      </div>
+
+      <Textarea
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        placeholder="Describe your feedback…"
+        rows={5}
+        className="resize-none"
+      />
+
+      {/* Attachments */}
+      <div className="flex flex-col gap-2">
+        {files.map((f, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm text-foreground bg-muted/40 rounded-lg px-3 py-2">
+            <Paperclip size={13} className="text-muted-foreground shrink-0" />
+            <span className="truncate flex-1">{f.name}</span>
+            <button type="button" onClick={() => removeFile(i)} className="text-muted-foreground hover:text-foreground shrink-0">
+              <X size={13} />
+            </button>
+          </div>
+        ))}
+        {files.length < 3 && (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Paperclip size={13} />
+            Attach file ({files.length}/3)
+          </button>
+        )}
+        <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
+      </div>
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      {sent ? (
+        <div className="flex items-center gap-2 text-sm text-emerald-600">
+          <CheckCircle size={15} />
+          Feedback sent. Thank you!
+        </div>
+      ) : (
+        <Button onClick={handleSend} disabled={sending || !message.trim()} className="gap-2 self-start">
+          <Send size={14} />
+          {sending ? 'Sending…' : 'Send Feedback'}
+        </Button>
+      )}
+    </div>
+  )
+}
+
+// ── Feedbacks Tab (admin/superadmin) ──────────────────────────────────────────
+
+function FeedbacksTab({ token }) {
+  const [feedbacks, setFeedbacks] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${API}/feedbacks`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(data => { setFeedbacks(Array.isArray(data) ? data : []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [token])
+
+  function formatDate(str) {
+    if (!str) return '—'
+    return new Date(str).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  }
+
+  if (loading) return <p className="text-sm text-muted-foreground">Loading…</p>
+
+  if (feedbacks.length === 0) return (
+    <p className="text-sm text-muted-foreground">No feedback submitted yet.</p>
+  )
+
+  return (
+    <div className="flex flex-col gap-4">
+      {feedbacks.map(fb => (
+        <div key={fb.id} className="bg-muted/30 border border-border rounded-xl p-4 flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-medium text-foreground">{fb.user_name}</span>
+            <span className="text-xs text-muted-foreground shrink-0">{formatDate(fb.created_at)}</span>
+          </div>
+          <p className="text-sm text-foreground whitespace-pre-wrap">{fb.message}</p>
+          {fb.attachments?.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {fb.attachments.map((att, i) => (
+                <a
+                  key={i}
+                  href={`/api/attachments/download/${encodeURIComponent(att.fileName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                >
+                  <Paperclip size={11} />
+                  {att.displayName}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 function Settings() {
@@ -603,10 +763,14 @@ function Settings() {
   const token = useToken()
   const isSuperadmin = user?.role === 'superadmin'
 
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+
   const tabs = [
     { key: 'preferences', label: 'Preferences' },
     ...(isSuperadmin ? [{ key: 'users', label: 'Users' }] : []),
     ...(isSuperadmin ? [{ key: 'live', label: 'Live' }] : []),
+    { key: 'feedback', label: 'Feedback' },
+    ...(isAdmin ? [{ key: 'feedbacks', label: 'Feedbacks' }] : []),
   ]
 
   const [activeTab, setActiveTab] = useState('preferences')
@@ -637,6 +801,8 @@ function Settings() {
       {activeTab === 'preferences' && <PreferencesTab token={token} isSuperadmin={isSuperadmin} />}
       {activeTab === 'users' && isSuperadmin && <UsersTab token={token} currentUserId={user?.id} />}
       {activeTab === 'live' && isSuperadmin && <LiveTab token={token} />}
+      {activeTab === 'feedback' && <FeedbackTab token={token} />}
+      {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
     </div>
   )
 }

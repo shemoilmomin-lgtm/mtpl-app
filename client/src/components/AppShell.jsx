@@ -289,7 +289,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
       )}>
         {/* Logo + mobile close */}
         <div className="px-4 py-5 flex items-center justify-between">
-          <span className="text-foreground font-semibold text-lg">MTPL</span>
+          <img src="/logo.svg" alt="MTPL" className="h-6 invert dark:invert-0" />
           <button
             onClick={() => setSidebarOpen(false)}
             className="md:hidden text-muted-foreground hover:text-foreground"
@@ -469,7 +469,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
           >
             <Menu size={20} />
           </button>
-          <span className="text-foreground font-semibold text-base">MTPL</span>
+          <img src="/logo.svg" alt="MTPL" className="h-5 invert dark:invert-0" />
           <div className="flex items-center gap-2">
             {!isSettingsPage && (
               <DropdownMenu>

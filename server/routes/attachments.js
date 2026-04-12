@@ -31,9 +31,11 @@ router.get("/download/:fileName", async (req, res) => {
     const command = new GetObjectCommand({ Bucket: bucket, Key: key });
     const response = await r2Client.send(command);
 
+    const mimeType = response.ContentType || "application/octet-stream";
+    const inline = /^(image\/|video\/|audio\/|text\/plain$|application\/pdf$)/.test(mimeType);
     res.setHeader("Cache-Control", "no-store");
-    res.setHeader("Content-Type", response.ContentType || "application/octet-stream");
-    res.setHeader("Content-Disposition", `attachment; filename="${key.split("/").pop()}"`);
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="${key.split("/").pop()}"`);
     if (response.ContentLength) res.setHeader("Content-Length", response.ContentLength);
 
     response.Body.pipe(res);

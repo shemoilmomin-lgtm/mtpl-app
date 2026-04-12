@@ -800,12 +800,26 @@ function Clients() {
     setDrawerOpen(true)
   }
 
+  const pendingOpenClientId = useRef(null)
+
   useEffect(() => {
     if (location.state?.openCreate) {
       openCreate()
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (location.state?.openClientId) {
+      pendingOpenClientId.current = location.state.openClientId
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (pendingOpenClientId.current && clients.length > 0) {
+      const found = clients.find(c => c.id === pendingOpenClientId.current)
+      if (found) openView(found)
+      pendingOpenClientId.current = null
+    }
+  }, [clients]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleArchive(client) {
     await fetch(`${API}/clients/archive/${client.id}`, {

@@ -1014,6 +1014,8 @@ function Leads({ tab = 'all' }) {
     return c?.company_name || c?.full_name || '—'
   }
 
+  const pendingOpenLeadId = useRef(null)
+
   useEffect(() => {
     if (location.state?.openCreate) {
       setSelectedLead(null)
@@ -1021,7 +1023,19 @@ function Leads({ tab = 'all' }) {
       setDrawerOpen(true)
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (location.state?.openLeadId) {
+      pendingOpenLeadId.current = location.state.openLeadId
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (pendingOpenLeadId.current && leads.length > 0) {
+      const found = leads.find(l => l.id === pendingOpenLeadId.current)
+      if (found) openView(found)
+      pendingOpenLeadId.current = null
+    }
+  }, [leads]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <p className="text-muted-foreground text-sm">Loading…</p>
 

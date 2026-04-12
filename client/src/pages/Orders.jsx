@@ -24,7 +24,7 @@ import {
   Plus, Search, MoreHorizontal, Copy, Archive, Trash2, Pencil, FileText,
   Check, ChevronsUpDown, Sun, Moon,
   X, ChevronDown, ChevronLeft, ChevronRight, AlignLeft, MessageSquare, Activity,
-  Phone, Mail, Paperclip, Reply, CornerDownRight,
+  Phone, Mail, Paperclip, Reply, CornerDownRight, SlidersHorizontal, ArrowUpDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
@@ -1665,6 +1665,16 @@ function Orders({ tab = 'active' }) {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(20)
 
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [filterAssignee, setFilterAssignee] = useState('')
+  const [filterDateFrom, setFilterDateFrom] = useState('')
+  const [filterDateTo, setFilterDateTo] = useState('')
+  const [filterJobType, setFilterJobType] = useState('')
+  const [filterProforma, setFilterProforma] = useState('') // '' | 'filled' | 'empty'
+  const [filterTaxInvoice, setFilterTaxInvoice] = useState('') // '' | 'filled' | 'empty'
+  const [sortBy, setSortBy] = useState('job_id') // 'job_id' | 'date' | 'status' | 'client'
+  const [sortDir, setSortDir] = useState('desc')
+
   const authHeaders = { Authorization: `Bearer ${token}` }
 
   async function fetchAll() {
@@ -1717,8 +1727,54 @@ function Orders({ tab = 'active' }) {
       )
     }
 
-    return [...list].sort((a, b) => (b.job_id || '').localeCompare(a.job_id || ''))
-  }, [orders, tab, search, clientMap])
+    if (filterAssignee) {
+      list = list.filter(o => o.assignees?.some(a => String(a.id) === filterAssignee))
+    }
+    if (filterJobType) {
+      list = list.filter(o => o.job_type === filterJobType)
+    }
+    if (filterDateFrom) {
+      const from = new Date(filterDateFrom)
+      list = list.filter(o => o.date && new Date(o.date) >= from)
+    }
+    if (filterDateTo) {
+      const to = new Date(filterDateTo)
+      to.setHours(23, 59, 59, 999)
+      list = list.filter(o => o.date && new Date(o.date) <= to)
+    }
+    if (filterProforma === 'filled') {
+      list = list.filter(o => o.proforma_number?.trim())
+    } else if (filterProforma === 'empty') {
+      list = list.filter(o => !o.proforma_number?.trim())
+    }
+    if (filterTaxInvoice === 'filled') {
+      list = list.filter(o => o.tax_invoice_number?.trim())
+    } else if (filterTaxInvoice === 'empty') {
+      list = list.filter(o => !o.tax_invoice_number?.trim())
+    }
+
+    return [...list].sort((a, b) => {
+      let av, bv
+      if (sortBy === 'date') {
+        av = a.date ? new Date(a.date).getTime() : 0
+        bv = b.date ? new Date(b.date).getTime() : 0
+      } else if (sortBy === 'status') {
+        av = a.status || ''
+        bv = b.status || ''
+        return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
+      } else if (sortBy === 'client') {
+        av = clientMap[a.client_id]?.company_name || clientMap[a.client_id]?.full_name || ''
+        bv = clientMap[b.client_id]?.company_name || clientMap[b.client_id]?.full_name || ''
+        return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
+      } else {
+        // job_id
+        return sortDir === 'asc'
+          ? (a.job_id || '').localeCompare(b.job_id || '')
+          : (b.job_id || '').localeCompare(a.job_id || '')
+      }
+      return sortDir === 'asc' ? av - bv : bv - av
+    })
+  }, [orders, tab, search, clientMap, filterAssignee, filterJobType, filterDateFrom, filterDateTo, filterProforma, filterTaxInvoice, sortBy, sortDir])
 
   useEffect(() => { setPage(1) }, [filtered])
 
@@ -1846,9 +1902,23 @@ function Orders({ tab = 'active' }) {
 
       {/* Search + Pagination controls */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="relative max-w-72 flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search orders…" className="pl-8" />
+        <div className="flex items-center gap-2 flex-1 flex-wrap">
+          <div className="relative max-w-72 flex-1">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search orders…" className="pl-8" />
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn('gap-1.5 shrink-0', filtersOpen && 'bg-muted')}
+            onClick={() => setFiltersOpen(v => !v)}
+          >
+            <SlidersHorizontal size={13} />
+            Filters
+            {(filterAssignee || filterJobType || filterDateFrom || filterDateTo || filterProforma || filterTaxInvoice) && (
+              <span className="size-1.5 rounded-full bg-primary" />
+            )}
+          </Button>
         </div>
         {filtered.length > 0 && (
           <div className="flex items-center gap-2 shrink-0">
@@ -1882,6 +1952,148 @@ function Orders({ tab = 'active' }) {
           </div>
         )}
       </div>
+
+      {/* Filter panel */}
+      {filtersOpen && (
+        <div className="bg-muted/30 border border-border rounded-xl p-4 flex flex-col gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {/* Assignee */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Assignee</label>
+              <Select value={filterAssignee} onValueChange={setFilterAssignee}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Any</SelectItem>
+                  {users.map(u => (
+                    <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Job type */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Job Type</label>
+              <Select value={filterJobType} onValueChange={setFilterJobType}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Any</SelectItem>
+                  {JOB_TYPES.map(t => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Proforma */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Proforma</label>
+              <Select value={filterProforma} onValueChange={setFilterProforma}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="filled">Filled</SelectItem>
+                  <SelectItem value="empty">Empty</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tax Invoice */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Tax Invoice</label>
+              <Select value={filterTaxInvoice} onValueChange={setFilterTaxInvoice}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="filled">Filled</SelectItem>
+                  <SelectItem value="empty">Empty</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date from */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Date From</label>
+              <Input
+                type="date"
+                value={filterDateFrom}
+                onChange={e => setFilterDateFrom(e.target.value)}
+                className="h-8 text-xs"
+              />
+            </div>
+
+            {/* Date to */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Date To</label>
+              <Input
+                type="date"
+                value={filterDateTo}
+                onChange={e => setFilterDateTo(e.target.value)}
+                className="h-8 text-xs"
+              />
+            </div>
+
+            {/* Sort by */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Sort By</label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="job_id">Job ID</SelectItem>
+                  <SelectItem value="date">Date</SelectItem>
+                  <SelectItem value="status">Status</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Sort direction */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Order</label>
+              <Select value={sortDir} onValueChange={setSortDir}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Newest / Z-A</SelectItem>
+                  <SelectItem value="asc">Oldest / A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {(filterAssignee || filterJobType || filterDateFrom || filterDateTo || filterProforma || filterTaxInvoice) && (
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs h-7 gap-1.5 text-muted-foreground"
+                onClick={() => {
+                  setFilterAssignee('')
+                  setFilterJobType('')
+                  setFilterDateFrom('')
+                  setFilterDateTo('')
+                  setFilterProforma('')
+                  setFilterTaxInvoice('')
+                }}
+              >
+                <X size={12} />
+                Clear filters
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Mobile card list */}
       <div className="md:hidden rounded-2xl ring-1 ring-foreground/5 divide-y divide-border overflow-hidden">
