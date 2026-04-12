@@ -981,7 +981,7 @@ const STATUS_CONFIG = {
   done:     { label: 'Done',     badge: 'bg-muted text-muted-foreground' },
 }
 
-function TaskForm({ task, clients, orders, users, clientMap, token, currentUser, onSave, onClose }) {
+function TaskForm({ task, clients, orders, users, clientMap, token, currentUser, onSave, onSaveComplete, onClose }) {
   const isEdit = Boolean(task?.id)
   const draftKey = isEdit ? `draft_task_edit_${task.id}` : 'draft_task'
 
@@ -1021,7 +1021,6 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
   }
 
   const [form, setForm] = useState(initialState)
-  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => { localStorage.setItem(draftKey, JSON.stringify(form)) }, [form, draftKey])
@@ -1038,53 +1037,59 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
 
   async function handleSave() {
     if (!form.title.trim()) { setError('Title is required'); return }
-    setSaving(true)
     setError('')
+
+    const body = {
+      ...(isEdit ? { id: task.id } : {}),
+      title: form.title,
+      description: form.description,
+      assignees: form.assignees,
+      client_id: form.client_id ? Number(form.client_id) : null,
+      order_id: form.order_id ? Number(form.order_id) : null,
+      status: VALID_TASK_STATUSES.includes(form.status) ? form.status : 'in_queue',
+      created_by: currentUser?.id,
+    }
+
+    // Optimistic update — close immediately and update the list
+    const tempId = isEdit ? task.id : -Date.now()
+    const optimisticTask = {
+      ...(isEdit ? task : {}),
+      ...body,
+      id: tempId,
+      assignees: users.filter(u => form.assignees.includes(u.id)),
+      created_at: task?.created_at || new Date().toISOString(),
+    }
+    localStorage.removeItem(draftKey)
+    onSave(optimisticTask, tempId)
+
+    // Fire API in background
     try {
-      const body = {
-        ...(isEdit ? { id: task.id } : {}),
-        title: form.title,
-        description: form.description,
-        assignees: form.assignees,
-        client_id: form.client_id ? Number(form.client_id) : null,
-        order_id: form.order_id ? Number(form.order_id) : null,
-        status: VALID_TASK_STATUSES.includes(form.status) ? form.status : 'in_queue',
-        created_by: currentUser?.id,
-      }
       const res = await fetch(`${API}/tasks/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
       })
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        setError(errData.error || `Failed to save task (${res.status})`)
-        return
-      }
-      const saved = await res.json()
+      if (res.ok) {
+        const saved = await res.json()
 
-      // Save reminder if set
-      if (form.reminder_date && form.reminder_time) {
-        const remindAt = `${form.reminder_date}T${form.reminder_time}:00`
-        const remindUserId = form.reminder_user_id || form.assignees[0] || currentUser.id
-        await fetch(`${API}/reminders/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            task_id: saved.id ?? task?.id,
-            user_id: Number(remindUserId),
-            remind_at: remindAt,
-          }),
-        })
-      }
+        // Save reminder if set
+        if (form.reminder_date && form.reminder_time) {
+          const remindAt = `${form.reminder_date}T${form.reminder_time}:00`
+          const remindUserId = form.reminder_user_id || form.assignees[0] || currentUser.id
+          await fetch(`${API}/reminders/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              task_id: saved.id,
+              user_id: Number(remindUserId),
+              remind_at: remindAt,
+            }),
+          })
+        }
 
-      localStorage.removeItem(draftKey)
-      onSave()
-    } catch {
-      setError('Could not connect to server')
-    } finally {
-      setSaving(false)
-    }
+        onSaveComplete(saved, tempId)
+      }
+    } catch {}
   }
 
   const hasReminder = form.reminder_date || form.reminder_time
@@ -1169,9 +1174,9 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
       </div>
 
       <SheetFooter className="border-t border-border px-4 sm:px-6 py-4 flex-row justify-end gap-2 shrink-0">
-        <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Task'}
+        <Button variant="outline" onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSave}>
+          {isEdit ? 'Save Changes' : 'Create Task'}
         </Button>
       </SheetFooter>
     </>
@@ -1688,7 +1693,16 @@ function Tasks({ tab = 'all' }) {
               clientMap={clientMap}
               token={token}
               currentUser={currentUser}
-              onSave={() => { setDrawerOpen(false); fetchAll() }}
+              onSave={(optimisticTask, tempId) => {
+                setDrawerOpen(false)
+                setTasks(prev => {
+                  if (tempId < 0) return [optimisticTask, ...prev]
+                  return prev.map(t => t.id === tempId ? optimisticTask : t)
+                })
+              }}
+              onSaveComplete={(realTask, tempId) => {
+                setTasks(prev => prev.map(t => t.id === tempId ? { ...t, ...realTask, assignees: t.assignees } : t))
+              }}
               onClose={() => setDrawerOpen(false)}
             />
           )}
