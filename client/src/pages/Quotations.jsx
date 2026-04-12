@@ -834,7 +834,7 @@ function QuotationView({ quotation, clientMap, userMap, onEdit, onClose, onDupli
 
 // ─── Quotation form ───────────────────────────────────────────────────────────
 
-function QuotationForm({ quotation, clients, users, leads = [], orders = [], token, currentUser, onSave, onClose }) {
+function QuotationForm({ quotation, clients, users, leads = [], orders = [], token, currentUser, allQuotations = [], onSave, onClose }) {
   const isEdit = Boolean(quotation?.id)
   const draftKey = isEdit ? `draft_quotation_edit_${quotation.id}` : 'draft_quotation'
 
@@ -1000,7 +1000,16 @@ function QuotationForm({ quotation, clients, users, leads = [], orders = [], tok
             <h2 className="text-sm font-semibold text-foreground">
               {isEdit ? 'Edit Quotation' : 'New Quotation'}
             </h2>
-            {isEdit && <p className="text-xs text-muted-foreground mt-0.5">{quotation.quotation_id}</p>}
+            {isEdit
+              ? <p className="text-xs text-muted-foreground mt-0.5">{quotation.quotation_id}</p>
+              : (() => {
+                  const maxNum = allQuotations.reduce((max, q) => {
+                    const m = q.quotation_id?.match(/^(?:MTPLQ-|QT-)(\d+)$/)
+                    return m ? Math.max(max, parseInt(m[1])) : max
+                  }, 0)
+                  return <p className="text-xs text-muted-foreground mt-0.5">MTPLQ-{String(maxNum + 1).padStart(4, '0')}</p>
+                })()
+            }
           </div>
           <button onClick={onClose}
             className="flex items-center justify-center size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
@@ -1080,7 +1089,7 @@ function QuotationForm({ quotation, clients, users, leads = [], orders = [], tok
         </Field>
 
         <Field label="Date">
-          <Input type="date" value={form.date} onChange={e => set('date', e.target.value)} />
+          <Input type="date" value={form.date} onChange={e => set('date', e.target.value)} className="w-full max-w-full" />
         </Field>
 
         <Field label="Linked Lead">
@@ -1331,7 +1340,7 @@ function Quotations() {
       setDrawerOpen(true)
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.state?.openCreate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <p className="text-muted-foreground text-sm">Loading…</p>
 
@@ -1553,6 +1562,7 @@ function Quotations() {
               orders={orders}
               token={token}
               currentUser={user}
+              allQuotations={quotations}
               onSave={handleSaved}
               onClose={selected ? () => setDrawerMode('view') : () => setDrawerOpen(false)}
             />
