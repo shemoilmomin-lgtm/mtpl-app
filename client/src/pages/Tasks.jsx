@@ -1380,6 +1380,8 @@ function Tasks({ tab = 'all' }) {
     setDrawerOpen(true)
   }
 
+  const pendingOpenTaskId = useRef(null)
+
   useEffect(() => {
     if (location.state?.openCreate) {
       setSelectedTask(null)
@@ -1388,19 +1390,17 @@ function Tasks({ tab = 'all' }) {
       navigate(location.pathname, { replace: true, state: {} })
     }
     if (location.state?.openTaskId) {
-      const taskId = location.state.openTaskId
-      // tasks may not be loaded yet; find after load or use effect below
-      const found = tasks.find(t => t.id === taskId)
-      if (found) { openView(found) }
+      pendingOpenTaskId.current = location.state.openTaskId
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle openTaskId after tasks have loaded
+  // Open pending task once tasks have loaded
   useEffect(() => {
-    if (location.state?.openTaskId && tasks.length > 0) {
-      const found = tasks.find(t => t.id === location.state.openTaskId)
+    if (pendingOpenTaskId.current && tasks.length > 0) {
+      const found = tasks.find(t => t.id === pendingOpenTaskId.current)
       if (found) openView(found)
+      pendingOpenTaskId.current = null
     }
   }, [tasks]) // eslint-disable-line react-hooks/exhaustive-deps
 
