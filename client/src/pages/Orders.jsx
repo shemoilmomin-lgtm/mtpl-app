@@ -1960,12 +1960,12 @@ function Orders({ tab = 'active' }) {
             {/* Assignee */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">Assignee</label>
-              <Select value={filterAssignee} onValueChange={setFilterAssignee}>
+              <Select value={filterAssignee || '_all'} onValueChange={v => setFilterAssignee(v === '_all' ? '' : v)}>
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Any" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="_all">Any</SelectItem>
                   {users.map(u => (
                     <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
                   ))}
@@ -1976,12 +1976,12 @@ function Orders({ tab = 'active' }) {
             {/* Job type */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">Job Type</label>
-              <Select value={filterJobType} onValueChange={setFilterJobType}>
+              <Select value={filterJobType || '_all'} onValueChange={v => setFilterJobType(v === '_all' ? '' : v)}>
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Any" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="_all">Any</SelectItem>
                   {JOB_TYPES.map(t => (
                     <SelectItem key={t} value={t}>{t}</SelectItem>
                   ))}
@@ -1992,12 +1992,12 @@ function Orders({ tab = 'active' }) {
             {/* Proforma */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">Proforma</label>
-              <Select value={filterProforma} onValueChange={setFilterProforma}>
+              <Select value={filterProforma || '_all'} onValueChange={v => setFilterProforma(v === '_all' ? '' : v)}>
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Any" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="_all">Any</SelectItem>
                   <SelectItem value="filled">Filled</SelectItem>
                   <SelectItem value="empty">Empty</SelectItem>
                 </SelectContent>
@@ -2007,12 +2007,12 @@ function Orders({ tab = 'active' }) {
             {/* Tax Invoice */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">Tax Invoice</label>
-              <Select value={filterTaxInvoice} onValueChange={setFilterTaxInvoice}>
+              <Select value={filterTaxInvoice || '_all'} onValueChange={v => setFilterTaxInvoice(v === '_all' ? '' : v)}>
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Any" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="_all">Any</SelectItem>
                   <SelectItem value="filled">Filled</SelectItem>
                   <SelectItem value="empty">Empty</SelectItem>
                 </SelectContent>
