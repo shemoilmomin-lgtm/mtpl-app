@@ -677,24 +677,17 @@ function parseMessage(msg) {
   return { text, attachments }
 }
 
-function AttachmentChip({ fileName, displayName, token }) {
-  async function handleDownload() {
-    try {
-      const res = await fetch(`${API}/attachments/download/${encodeURIComponent(fileName)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.json())
-      if (res.url) window.open(res.url, '_blank')
-    } catch {}
-  }
-
+function AttachmentChip({ fileName, displayName }) {
   return (
-    <button
-      onClick={handleDownload}
-      className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground hover:bg-muted transition-colors w-fit"
+    <a
+      href={`${API}/attachments/download/${encodeURIComponent(fileName)}`}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground hover:bg-muted transition-colors w-fit"
     >
       <Paperclip size={11} className="shrink-0 text-muted-foreground" />
       {displayName}
-    </button>
+    </a>
   )
 }
 
@@ -1746,23 +1739,25 @@ function Orders({ tab = 'active' }) {
     setDrawerOpen(true)
   }
 
+  const pendingOpenOrderId = useRef(null)
+
   useEffect(() => {
     if (location.state?.openCreate) {
       openCreate()
       navigate(location.pathname, { replace: true, state: {} })
     }
     if (location.state?.openOrderId) {
-      const found = orders.find(o => o.id === location.state.openOrderId)
-      if (found) openView(found)
+      pendingOpenOrderId.current = location.state.openOrderId
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle openOrderId after orders have loaded
+  // Open the pending order once orders have loaded
   useEffect(() => {
-    if (location.state?.openOrderId && orders.length > 0) {
-      const found = orders.find(o => o.id === location.state.openOrderId)
+    if (pendingOpenOrderId.current && orders.length > 0) {
+      const found = orders.find(o => o.id === pendingOpenOrderId.current)
       if (found) openView(found)
+      pendingOpenOrderId.current = null
     }
   }, [orders]) // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { uploadFile, getPresignedUrl } = require("../config/r2Utils");
+const { GetObjectCommand } = require("@aws-sdk/client-s3");
+const { uploadFile } = require("../config/r2Utils");
+const { r2Client, bucket } = require("../config/r2");
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -22,14 +24,21 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-// Get presigned download URL
+// Stream file directly from R2 to the client
 router.get("/download/:fileName", async (req, res) => {
   try {
-    const url = await getPresignedUrl(req.params.fileName);
-    res.json({ success: true, url });
+    const key = decodeURIComponent(req.params.fileName);
+    const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const response = await r2Client.send(command);
+
+    res.setHeader("Content-Type", response.ContentType || "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${key.split("/").pop()}"`);
+    if (response.ContentLength) res.setHeader("Content-Length", response.ContentLength);
+
+    response.Body.pipe(res);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: "Could not generate URL" });
+    res.status(500).json({ success: false, error: "Could not download file" });
   }
 });
 

@@ -117,23 +117,17 @@ function UserAvatar({ name, size = 6 }) {
   )
 }
 
-function AttachmentChip({ fileName, displayName, token }) {
-  async function handleDownload() {
-    try {
-      const res = await fetch(`${API}/attachments/download/${encodeURIComponent(fileName)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.json())
-      if (res.url) window.open(res.url, '_blank')
-    } catch {}
-  }
+function AttachmentChip({ fileName, displayName }) {
   return (
-    <button
-      onClick={handleDownload}
+    <a
+      href={`${API}/attachments/download/${encodeURIComponent(fileName)}`}
+      target="_blank"
+      rel="noreferrer"
       className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2.5 py-1 text-xs text-foreground hover:bg-muted transition-colors w-fit"
     >
       <Paperclip size={11} className="text-muted-foreground" />
       {displayName}
-    </button>
+    </a>
   )
 }
 
