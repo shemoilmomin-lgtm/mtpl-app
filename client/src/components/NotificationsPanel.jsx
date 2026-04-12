@@ -16,7 +16,8 @@ const TYPE_CONFIG = {
 
 function formatRelativeTime(str) {
   if (!str) return ''
-  const diff = Date.now() - new Date(str).getTime()
+  const normalized = str.endsWith('Z') || str.includes('+') ? str : str + 'Z'
+  const diff = Date.now() - new Date(normalized).getTime()
   const m = Math.floor(diff / 60000)
   if (m < 1) return 'just now'
   if (m < 60) return `${m}m ago`

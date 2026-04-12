@@ -67,22 +67,22 @@ setInterval(async () => {
     );
     for (const reminder of due.rows) {
       // Insert into notifications table
-      await pool.query(
+      const message = `Reminder for task: ${reminder.task_title}`;
+
+      const notifResult = await pool.query(
         `INSERT INTO notifications (user_id, message, entity_type, entity_id, notification_type)
-         VALUES ($1, $2, 'task', $3, 'reminder')`,
-        [
-          reminder.user_id,
-          `Reminder: ${reminder.task_title}`,
-          reminder.task_id,
-        ]
+         VALUES ($1, $2, 'task', $3, 'reminder') RETURNING *`,
+        [reminder.user_id, message, reminder.task_id]
       );
+      const notif = notifResult.rows[0];
 
       // Push live SSE notification
       pushToUser(reminder.user_id, 'notification', {
+        id: notif.id,
         type: 'reminder',
         task_id: reminder.task_id,
         task_title: reminder.task_title,
-        message: `Reminder: ${reminder.task_title}`,
+        message,
       });
 
       // Mark reminder as dismissed so it doesn't fire again

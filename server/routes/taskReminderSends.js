@@ -52,14 +52,25 @@ router.post("/send", authenticate, async (req, res) => {
     );
     const send = result.rows[0];
 
+    const message = `${senderName} sent you a reminder for task: ${task.title}`;
+
+    // Persist to notifications table
+    const notifResult = await pool.query(
+      `INSERT INTO notifications (user_id, message, entity_type, entity_id, notification_type, sender_id)
+       VALUES ($1, $2, 'task', $3, 'reminder', $4) RETURNING *`,
+      [sent_to, message, task_id, senderId]
+    );
+    const notif = notifResult.rows[0];
+
     // Push live notification to the recipient
     pushToUser(sent_to, "notification", {
+      id: notif.id,
       type: "reminder",
       task_id,
       task_title: task.title,
       sent_by_name: senderName,
       sent_at: send.sent_at,
-      message: `${senderName} sent you a reminder for task: ${task.title}`,
+      message,
     });
 
     res.json(send);
