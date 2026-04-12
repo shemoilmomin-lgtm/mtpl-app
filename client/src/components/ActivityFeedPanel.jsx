@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { X, AtSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { renderWithMentions } from '@/components/MentionInput'
@@ -34,11 +35,27 @@ function stripAttachments(msg) {
   return msg?.replace(/\[attachment:[^\]]+\]/g, '').trim() || ''
 }
 
+const ENTITY_OPEN_KEY = {
+  order:     'openOrderId',
+  task:      'openTaskId',
+  lead:      'openLeadId',
+  quotation: 'openQuotationId',
+  client:    'openClientId',
+}
+
 export function ActivityFeedPanel({ token, onClose }) {
+  const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const esRef = useRef(null)
+
+  function handleCommentClick(item) {
+    const key = ENTITY_OPEN_KEY[item.entity_type]
+    if (!key) return
+    onClose()
+    navigate(`/${item.entity_type}s`, { state: { [key]: item.entity_id } })
+  }
 
   useEffect(() => {
     const headers = { Authorization: `Bearer ${token}` }
@@ -109,8 +126,9 @@ export function ActivityFeedPanel({ token, onClose }) {
               return (
                 <div
                   key={item.id}
+                  onClick={() => handleCommentClick(item)}
                   className={cn(
-                    'px-4 py-3 flex flex-col gap-1.5',
+                    'px-4 py-3 flex flex-col gap-1.5 cursor-pointer hover:bg-muted/40 transition-colors',
                     isMention && 'border-l-2 border-primary'
                   )}
                 >
