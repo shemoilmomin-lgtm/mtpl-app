@@ -503,7 +503,7 @@ function AssigneeSelect({ users, value, onChange }) {
 
 // ─── Details tab ──────────────────────────────────────────────────────────────
 
-function DetailsTab({ order, client, preparedByUser, quotationAmount, quotationRef }) {
+function DetailsTab({ order, client, preparedByUser, quotationAmount, quotationRef, token, isAdmin }) {
   return (
     <div className="px-4 sm:px-6 py-4 sm:py-5 flex flex-col gap-6">
 
@@ -1256,6 +1256,8 @@ function OrderView({
               preparedByUser={preparedByUser}
               quotationAmount={quotationAmount}
               quotationRef={quotationRef}
+              token={token}
+              isAdmin={isAdmin}
             />
           </div>
         )}
