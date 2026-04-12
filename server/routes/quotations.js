@@ -25,18 +25,8 @@ router.get("/trashed", authenticate, async (req, res) => {
 // Get all quotations with their line items
 router.get("/next-number", authenticate, async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT COALESCE(MAX(
-        CAST(REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') AS INTEGER)
-      ), 0) as max_num
-      FROM quotations
-      WHERE (quotation_id ILIKE 'QT-%' OR quotation_id ILIKE 'MTPLQ-%')
-        AND REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') ~ '^[0-9]+$'
-    `);
-    const sample = await pool.query(`SELECT quotation_id FROM quotations ORDER BY id DESC LIMIT 5`);
-    console.log('[next-number] sample quotation_ids:', sample.rows.map(r => r.quotation_id));
+    const result = await pool.query(`SELECT COALESCE(MAX(id), 0) as max_num FROM quotations`);
     const maxNum = parseInt(result.rows[0].max_num) || 0;
-    console.log('[next-number] max_num from DB:', result.rows[0].max_num, '→ maxNum:', maxNum);
     res.json({ next: `MTPLQ-${String(maxNum + 1).padStart(4, '0')}` });
   } catch (err) {
     console.error(err);
@@ -197,14 +187,7 @@ router.post("/save", authenticate, async (req, res) => {
       await logActivity({ userId: req.user.id, action: "edited", entityType: "quotation", entityId: id, entityLabel: quotation_label, message: allChanges || 'Saved with no changes' });
       res.json({ success: true });
     } else {
-      const maxResult = await pool.query(`
-        SELECT COALESCE(MAX(
-          CAST(REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') AS INTEGER)
-        ), 0) as max_num
-        FROM quotations
-        WHERE (quotation_id ILIKE 'QT-%' OR quotation_id ILIKE 'MTPLQ-%')
-          AND REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') ~ '^[0-9]+$'
-      `);
+      const maxResult = await pool.query(`SELECT COALESCE(MAX(id), 0) as max_num FROM quotations`);
       const maxNum = parseInt(maxResult.rows[0].max_num) || 0;
       const quotation_id = `MTPLQ-${String(maxNum + 1).padStart(4, "0")}`;
 
@@ -247,14 +230,7 @@ router.post("/duplicate/:id", authenticate, async (req, res) => {
 
     const q = original.rows[0];
 
-    const maxResult2 = await pool.query(`
-      SELECT COALESCE(MAX(
-        CAST(REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') AS INTEGER)
-      ), 0) as max_num
-      FROM quotations
-      WHERE (quotation_id ILIKE 'QT-%' OR quotation_id ILIKE 'MTPLQ-%')
-        AND REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') ~ '^[0-9]+$'
-    `);
+    const maxResult2 = await pool.query(`SELECT COALESCE(MAX(id), 0) as max_num FROM quotations`);
     const maxNum2 = parseInt(maxResult2.rows[0].max_num) || 0;
     const quotation_id = `MTPLQ-${String(maxNum2 + 1).padStart(4, "0")}`;
 
