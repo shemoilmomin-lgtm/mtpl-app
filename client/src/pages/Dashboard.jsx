@@ -167,20 +167,24 @@ function DeliveryCalendar({ orders }) {
     const now = new Date()
     return { year: now.getFullYear(), month: now.getMonth() }
   })
+  const [selectedDay, setSelectedDay] = useState(null)
   const { year, month } = current
 
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const today = new Date()
 
+  // Parse delivery_expected safely without timezone shift
   const deliveryMap = {}
   orders.forEach((o) => {
     if (!o.delivery_expected) return
-    const d = new Date(o.delivery_expected)
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      const key = d.getDate()
-      if (!deliveryMap[key]) deliveryMap[key] = []
-      deliveryMap[key].push(o)
+    const raw = typeof o.delivery_expected === 'string'
+      ? o.delivery_expected.slice(0, 10)   // "YYYY-MM-DD"
+      : o.delivery_expected.toISOString().slice(0, 10)
+    const [y, m, d] = raw.split('-').map(Number)
+    if (y === year && m - 1 === month) {
+      if (!deliveryMap[d]) deliveryMap[d] = []
+      deliveryMap[d].push(o)
     }
   })
 
@@ -195,59 +199,100 @@ function DeliveryCalendar({ orders }) {
   const isToday = (d) =>
     d === today.getDate() && month === today.getMonth() && year === today.getFullYear()
 
+  const selectedOrders = selectedDay ? (deliveryMap[selectedDay] || []) : []
+
   return (
-    <div className="bg-card rounded-2xl p-5 ring-1 ring-foreground/5">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold text-foreground">{monthName}</p>
+    <div className="bg-card rounded-2xl p-5 ring-1 ring-foreground/5 flex flex-col gap-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Delivery Calendar</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{monthName}</p>
+        </div>
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon-sm" onClick={() => setCurrent(({ year, month }) => {
+          <Button variant="ghost" size="icon-sm" onClick={() => { setCurrent(({ year, month }) => {
             const d = new Date(year, month - 1)
             return { year: d.getFullYear(), month: d.getMonth() }
-          })}><ChevronLeft size={14} /></Button>
-          <Button variant="ghost" size="icon-sm" onClick={() => setCurrent(({ year, month }) => {
+          }); setSelectedDay(null) }}><ChevronLeft size={14} /></Button>
+          <Button variant="ghost" size="icon-sm" onClick={() => { setCurrent(({ year, month }) => {
             const d = new Date(year, month + 1)
             return { year: d.getFullYear(), month: d.getMonth() }
-          })}><ChevronRight size={14} /></Button>
+          }); setSelectedDay(null) }}><ChevronRight size={14} /></Button>
         </div>
       </div>
-      <div className="grid grid-cols-7 text-center text-[11px] text-muted-foreground mb-1">
+
+      {/* Day labels */}
+      <div className="grid grid-cols-7 text-center text-[11px] text-muted-foreground">
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
           <div key={d} className="py-1 font-medium">{d}</div>
         ))}
       </div>
+
+      {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-0.5">
-        {cells.map((day, i) => (
-          <div
-            key={i}
-            className={cn(
-              'min-h-8 rounded-lg p-0.5 flex flex-col items-center gap-0.5',
-              isToday(day) && 'bg-primary/10 ring-1 ring-primary/30'
-            )}
-          >
-            {day && (
-              <>
-                <span className={cn(
-                  'text-[11px] font-medium w-full text-center leading-5',
-                  isToday(day) ? 'text-primary' : 'text-foreground'
-                )}>{day}</span>
-                {deliveryMap[day]?.slice(0, 2).map((o, j) => (
-                  <div
-                    key={j}
-                    className="w-full bg-primary/20 text-primary rounded px-0.5 truncate text-[9px] leading-4 text-center cursor-pointer hover:bg-primary/30 transition-colors"
-                    title={o.project_name}
-                    onClick={() => navigate('/orders', { state: { openOrderId: o.id } })}
-                  >
-                    {o.project_name}
-                  </div>
-                ))}
-                {deliveryMap[day]?.length > 2 && (
-                  <span className="text-[9px] text-muted-foreground">+{deliveryMap[day].length - 2}</span>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+        {cells.map((day, i) => {
+          const hasDeliveries = day && deliveryMap[day]?.length > 0
+          const count = deliveryMap[day]?.length || 0
+          const isSelected = day === selectedDay
+          return (
+            <div
+              key={i}
+              onClick={() => day && setSelectedDay(isSelected ? null : day)}
+              className={cn(
+                'relative flex flex-col items-center justify-start pt-1 pb-1.5 rounded-lg min-h-9 transition-colors',
+                day && 'cursor-pointer',
+                isToday(day) && !isSelected && 'bg-primary/10 ring-1 ring-primary/30',
+                isSelected && 'bg-primary/20 ring-1 ring-primary/40',
+                hasDeliveries && !isSelected && 'hover:bg-muted/60',
+                !hasDeliveries && day && 'hover:bg-muted/30',
+              )}
+            >
+              {day && (
+                <>
+                  <span className={cn(
+                    'text-[11px] font-medium leading-5',
+                    isToday(day) || isSelected ? 'text-primary font-semibold' : 'text-foreground'
+                  )}>{day}</span>
+                  {hasDeliveries && (
+                    <span className={cn(
+                      'text-[9px] font-bold leading-none mt-0.5 size-4 flex items-center justify-center rounded-full',
+                      count >= 3 ? 'bg-red-500 text-white' :
+                      count === 2 ? 'bg-amber-500 text-white' :
+                      'bg-primary text-primary-foreground'
+                    )}>
+                      {count}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          )
+        })}
       </div>
+
+      {/* Selected day deliveries */}
+      {selectedDay && (
+        <div className="border-t border-border pt-3 flex flex-col gap-2">
+          <p className="text-xs font-semibold text-muted-foreground">
+            {selectedOrders.length} deliver{selectedOrders.length === 1 ? 'y' : 'ies'} on {selectedDay} {monthName.split(' ')[0]}
+          </p>
+          {selectedOrders.map((o) => (
+            <div
+              key={o.id}
+              onClick={() => navigate('/orders', { state: { openOrderId: o.id } })}
+              className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors"
+            >
+              <span className="size-1.5 rounded-full bg-primary shrink-0" />
+              <span className="truncate">{o.project_name || o.job_id || '—'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* No deliveries this month */}
+      {Object.keys(deliveryMap).length === 0 && (
+        <p className="text-xs text-muted-foreground text-center py-2">No deliveries scheduled this month</p>
+      )}
     </div>
   )
 }
