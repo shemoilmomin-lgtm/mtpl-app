@@ -33,6 +33,8 @@ router.get("/next-number", authenticate, async (req, res) => {
       WHERE (quotation_id ILIKE 'QT-%' OR quotation_id ILIKE 'MTPLQ-%')
         AND REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') ~ '^[0-9]+$'
     `);
+    const sample = await pool.query(`SELECT quotation_id FROM quotations ORDER BY id DESC LIMIT 5`);
+    console.log('[next-number] sample quotation_ids:', sample.rows.map(r => r.quotation_id));
     const maxNum = parseInt(result.rows[0].max_num) || 0;
     console.log('[next-number] max_num from DB:', result.rows[0].max_num, '→ maxNum:', maxNum);
     res.json({ next: `MTPLQ-${String(maxNum + 1).padStart(4, '0')}` });
