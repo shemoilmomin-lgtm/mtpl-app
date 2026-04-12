@@ -26,12 +26,12 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
 // Stream file directly from R2 to the client
 router.get("/download/:fileName", async (req, res) => {
-  console.log('[attachments] STREAMING v2 — key:', req.params.fileName);
   try {
     const key = decodeURIComponent(req.params.fileName);
     const command = new GetObjectCommand({ Bucket: bucket, Key: key });
     const response = await r2Client.send(command);
 
+    res.setHeader("Cache-Control", "no-store");
     res.setHeader("Content-Type", response.ContentType || "application/octet-stream");
     res.setHeader("Content-Disposition", `attachment; filename="${key.split("/").pop()}"`);
     if (response.ContentLength) res.setHeader("Content-Length", response.ContentLength);
