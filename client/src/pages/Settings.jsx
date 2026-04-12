@@ -446,6 +446,58 @@ function PreferencesTab({ token, isSuperadmin }) {
         </div>
       )}
 
+      {/* App update button — mobile only */}
+      <AppUpdateSection />
+
+    </div>
+  )
+}
+
+// ── App update ────────────────────────────────────────────────────────────────
+
+function AppUpdateSection() {
+  const [updateAvailable, setUpdateAvailable] = useState(() => !!window.__swUpdateAvailable)
+  const [updating, setUpdating] = useState(false)
+
+  useEffect(() => {
+    function onUpdate() { setUpdateAvailable(true) }
+    window.addEventListener('swUpdateAvailable', onUpdate)
+    return () => window.removeEventListener('swUpdateAvailable', onUpdate)
+  }, [])
+
+  function handleUpdate() {
+    const reg = window.__swRegistration
+    if (reg?.waiting) {
+      setUpdating(true)
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+      // controllerchange in main.jsx will reload the page
+    } else {
+      // No waiting SW — check for update manually
+      reg?.update().then(() => {
+        if (!window.__swUpdateAvailable) {
+          // briefly show "up to date" state
+          setUpdateAvailable(false)
+        }
+      }).catch(() => {})
+    }
+  }
+
+  return (
+    <div className="md:hidden pt-2 border-t border-border">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm text-foreground">App Version</p>
+          <p className="text-xs text-muted-foreground">Stable v3{updateAvailable ? ' — update available' : ''}</p>
+        </div>
+        <Button
+          size="sm"
+          variant={updateAvailable ? 'default' : 'outline'}
+          onClick={handleUpdate}
+          disabled={updating}
+        >
+          {updating ? 'Updating…' : updateAvailable ? 'Update Now' : 'Check for Updates'}
+        </Button>
+      </div>
     </div>
   )
 }

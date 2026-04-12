@@ -571,7 +571,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 md:pb-6">
           {children}
         </div>
       </main>
@@ -618,6 +618,31 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
           />
         )}
       </div>
+
+      {/* Mobile bottom navigation bar */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border flex items-stretch h-16 safe-area-inset-bottom">
+        {[
+          { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+          { to: '/orders',    icon: ShoppingBag,     label: 'Orders' },
+          { to: '/tasks',     icon: CheckSquare,     label: 'Tasks' },
+          { to: '/leads',     icon: TrendingUp,      label: 'Leads' },
+        ].map(({ to, icon: Icon, label }) => {
+          const isActive = location.pathname === to || (to !== '/dashboard' && location.pathname.startsWith(to))
+          return (
+            <button
+              key={to}
+              onClick={() => navigate(to)}
+              className={cn(
+                'flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors',
+                isActive ? 'text-primary' : 'text-muted-foreground'
+              )}
+            >
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+              {label}
+            </button>
+          )
+        })}
+      </nav>
     </div>
   )
 }
