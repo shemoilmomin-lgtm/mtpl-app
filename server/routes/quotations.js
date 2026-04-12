@@ -27,14 +27,14 @@ router.get("/next-number", authenticate, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT COALESCE(MAX(
-        CASE
-          WHEN quotation_id ~* '^(MTPLQ|QT)-[0-9]+$'
-          THEN CAST(REGEXP_REPLACE(quotation_id, '^[A-Za-z]+-', '') AS INTEGER)
-          ELSE 0
-        END
-      ), 0) as max_num FROM quotations
+        CAST(REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') AS INTEGER)
+      ), 0) as max_num
+      FROM quotations
+      WHERE (quotation_id ILIKE 'QT-%' OR quotation_id ILIKE 'MTPLQ-%')
+        AND REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') ~ '^[0-9]+$'
     `);
     const maxNum = parseInt(result.rows[0].max_num) || 0;
+    console.log('[next-number] max_num from DB:', result.rows[0].max_num, '→ maxNum:', maxNum);
     res.json({ next: `MTPLQ-${String(maxNum + 1).padStart(4, '0')}` });
   } catch (err) {
     console.error(err);
@@ -197,12 +197,11 @@ router.post("/save", authenticate, async (req, res) => {
     } else {
       const maxResult = await pool.query(`
         SELECT COALESCE(MAX(
-          CASE
-            WHEN quotation_id ~* '^(MTPLQ|QT)-[0-9]+$'
-            THEN CAST(REGEXP_REPLACE(quotation_id, '^[A-Za-z]+-', '') AS INTEGER)
-            ELSE 0
-          END
-        ), 0) as max_num FROM quotations
+          CAST(REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') AS INTEGER)
+        ), 0) as max_num
+        FROM quotations
+        WHERE (quotation_id ILIKE 'QT-%' OR quotation_id ILIKE 'MTPLQ-%')
+          AND REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') ~ '^[0-9]+$'
       `);
       const maxNum = parseInt(maxResult.rows[0].max_num) || 0;
       const quotation_id = `MTPLQ-${String(maxNum + 1).padStart(4, "0")}`;
@@ -248,12 +247,11 @@ router.post("/duplicate/:id", authenticate, async (req, res) => {
 
     const maxResult2 = await pool.query(`
       SELECT COALESCE(MAX(
-        CASE
-          WHEN quotation_id ~* '^(MTPLQ|QT)-[0-9]+$'
-          THEN CAST(REGEXP_REPLACE(quotation_id, '^[A-Za-z]+-', '') AS INTEGER)
-          ELSE 0
-        END
-      ), 0) as max_num FROM quotations
+        CAST(REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') AS INTEGER)
+      ), 0) as max_num
+      FROM quotations
+      WHERE (quotation_id ILIKE 'QT-%' OR quotation_id ILIKE 'MTPLQ-%')
+        AND REGEXP_REPLACE(quotation_id, '[^0-9]', '', 'g') ~ '^[0-9]+$'
     `);
     const maxNum2 = parseInt(maxResult2.rows[0].max_num) || 0;
     const quotation_id = `MTPLQ-${String(maxNum2 + 1).padStart(4, "0")}`;
