@@ -233,7 +233,7 @@ function DeliveryCalendar({ orders }) {
         {cells.map((day, i) => {
           const hasDeliveries = day && deliveryMap[day]?.length > 0
           const count = deliveryMap[day]?.length || 0
-          const isSelected = day === selectedDay
+          const isSelected = day !== null && day === selectedDay
           return (
             <div
               key={i}
