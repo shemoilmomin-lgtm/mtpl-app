@@ -555,7 +555,7 @@ function CommentsTab({ entityId, userMap, token, currentUser }) {
           <MentionInput
             value={message}
             onChange={e => setMessage(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendComment() } }}
+            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendComment() } }}
             placeholder="Add a comment…"
             users={Object.values(userMap)}
             className="w-full bg-input/50 rounded-3xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30 placeholder:text-muted-foreground"
