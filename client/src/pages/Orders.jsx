@@ -1087,7 +1087,7 @@ function InlineInvoiceField({ label, field, initialValue, orderId, token, canEdi
     <div className="flex flex-col gap-0.5">
       <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
       {editing ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <input
             autoFocus
             value={value}
@@ -1095,8 +1095,9 @@ function InlineInvoiceField({ label, field, initialValue, orderId, token, canEdi
             onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
             className="text-sm font-mono bg-input/50 border border-border rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-ring/30 w-48"
           />
-          <button onClick={save} disabled={saving} className="text-xs text-primary hover:underline">{saving ? '…' : 'Save'}</button>
-          <button onClick={() => setEditing(false)} className="text-xs text-muted-foreground hover:text-foreground">Cancel</button>
+          <button onClick={save} disabled={saving} className="flex items-center justify-center size-6 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+            {saving ? <span className="text-[10px]">…</span> : <Check size={12} />}
+          </button>
         </div>
       ) : (
         <div className="flex items-center gap-1.5 group">
