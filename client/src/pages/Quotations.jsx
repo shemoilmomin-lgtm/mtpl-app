@@ -834,8 +834,17 @@ function QuotationView({ quotation, clientMap, userMap, onEdit, onClose, onDupli
 
 // ─── Quotation form ───────────────────────────────────────────────────────────
 
-function QuotationForm({ quotation, clients, users, leads = [], orders = [], token, currentUser, allQuotations = [], onSave, onClose }) {
+function QuotationForm({ quotation, clients, users, leads = [], orders = [], token, currentUser, onSave, onClose }) {
   const isEdit = Boolean(quotation?.id)
+  const [nextNumber, setNextNumber] = useState('')
+  useEffect(() => {
+    if (!isEdit) {
+      fetch(`${API}/quotations/next-number`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(d => setNextNumber(d.next || ''))
+        .catch(() => {})
+    }
+  }, [isEdit, token])
   const draftKey = isEdit ? `draft_quotation_edit_${quotation.id}` : 'draft_quotation'
 
   function emptyItem() {
@@ -1002,13 +1011,7 @@ function QuotationForm({ quotation, clients, users, leads = [], orders = [], tok
             </h2>
             {isEdit
               ? <p className="text-xs text-muted-foreground mt-0.5">{quotation.quotation_id}</p>
-              : (() => {
-                  const maxNum = allQuotations.reduce((max, q) => {
-                    const m = q.quotation_id?.match(/^(?:MTPLQ|QT)-(\d+)$/i)
-                    return m ? Math.max(max, parseInt(m[1])) : max
-                  }, 0)
-                  return <p className="text-xs text-muted-foreground mt-0.5">MTPLQ-{String(maxNum + 1).padStart(4, '0')}</p>
-                })()
+              : nextNumber && <p className="text-xs text-muted-foreground mt-0.5">{nextNumber}</p>
             }
           </div>
           <button onClick={onClose}
@@ -1562,7 +1565,6 @@ function Quotations() {
               orders={orders}
               token={token}
               currentUser={user}
-              allQuotations={quotations}
               onSave={handleSaved}
               onClose={selected ? () => setDrawerMode('view') : () => setDrawerOpen(false)}
             />

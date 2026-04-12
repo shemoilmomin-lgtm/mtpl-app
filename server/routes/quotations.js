@@ -23,6 +23,25 @@ router.get("/trashed", authenticate, async (req, res) => {
 });
 
 // Get all quotations with their line items
+router.get("/next-number", authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT COALESCE(MAX(
+        CASE
+          WHEN quotation_id ~* '^(MTPLQ|QT)-[0-9]+$'
+          THEN CAST(REGEXP_REPLACE(quotation_id, '^[A-Za-z]+-', '') AS INTEGER)
+          ELSE 0
+        END
+      ), 0) as max_num FROM quotations
+    `);
+    const maxNum = parseInt(result.rows[0].max_num) || 0;
+    res.json({ next: `MTPLQ-${String(maxNum + 1).padStart(4, '0')}` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get("/", authenticate, async (req, res) => {
   try {
     const quotations = await pool.query(
