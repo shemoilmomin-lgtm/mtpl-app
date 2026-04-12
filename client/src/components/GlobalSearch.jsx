@@ -93,19 +93,23 @@ export function GlobalSearch({ token, onClose }) {
   return (
     <div className="flex flex-col w-full h-full">
       {/* Input row */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
+      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border shrink-0">
         <Search size={16} className="text-muted-foreground shrink-0" />
         <input
           ref={inputRef}
           value={query}
           onChange={handleChange}
-          placeholder="Search orders, tasks, clients, quotations…"
+          placeholder="Search everything…"
           className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
         />
-        {query && (
+        {query ? (
           <button onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus() }}
-            className="text-muted-foreground hover:text-foreground">
+            className="text-muted-foreground hover:text-foreground shrink-0">
             <X size={14} />
+          </button>
+        ) : (
+          <button onClick={() => onClose?.()} className="text-muted-foreground hover:text-foreground shrink-0">
+            <X size={16} />
           </button>
         )}
       </div>

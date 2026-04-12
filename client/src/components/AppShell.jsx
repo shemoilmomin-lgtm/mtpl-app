@@ -542,20 +542,14 @@ function AppShell({ children }) {
             )}
           </div>
           {/* Search bar */}
-          <div className="flex-1 max-w-sm relative">
-            {searchOpen ? (
-              <div className="absolute top-0 left-0 right-0 z-50 bg-card border border-border rounded-xl shadow-lg overflow-hidden max-h-[60vh] flex flex-col">
-                <GlobalSearch token={token} onClose={() => setSearchOpen(false)} />
-              </div>
-            ) : (
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg border border-border bg-muted/40 text-sm text-muted-foreground hover:bg-muted transition-colors"
-              >
-                <Search size={14} />
-                Search…
-              </button>
-            )}
+          <div className="flex-1 max-w-sm">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg border border-border bg-muted/40 text-sm text-muted-foreground hover:bg-muted transition-colors"
+            >
+              <Search size={14} />
+              Search…
+            </button>
           </div>
           <div className="ml-auto shrink-0 flex items-center">
           {!isSettingsPage && (
@@ -593,19 +587,16 @@ function AppShell({ children }) {
         </div>
       </main>
 
-      {/* Global search overlay — mobile full screen */}
+      {/* Global search overlay */}
       {searchOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-card flex flex-col">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-            <span className="text-sm font-medium text-foreground">Search</span>
-            <button onClick={() => setSearchOpen(false)} className="ml-auto text-muted-foreground hover:text-foreground">
-              <X size={18} />
-            </button>
-          </div>
-          <div className="flex-1 overflow-hidden flex flex-col">
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setSearchOpen(false)} />
+          {/* Panel — full screen on mobile, centered modal on desktop */}
+          <div className="fixed inset-0 z-50 md:inset-auto md:top-16 md:left-1/2 md:-translate-x-1/2 md:w-[520px] md:max-h-[70vh] bg-card md:rounded-xl md:border md:border-border md:shadow-xl flex flex-col overflow-hidden">
             <GlobalSearch token={token} onClose={() => setSearchOpen(false)} />
           </div>
-        </div>
+        </>
       )}
 
       {/* Activity feed panel — full overlay on mobile, side panel on desktop */}

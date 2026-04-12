@@ -14,8 +14,7 @@ router.get('/', authenticate, async (req, res) => {
       pool.query(
         `SELECT 'client' as type, c.id::text, c.full_name as label, c.company_name as subtitle
          FROM clients c
-         WHERE (c.full_name ILIKE $1 OR c.company_name ILIKE $1 OR c.phone ILIKE $1 OR c.email ILIKE $1)
-           AND c.is_trashed = false
+         WHERE c.full_name ILIKE $1 OR c.company_name ILIKE $1 OR c.phone ILIKE $1 OR c.email ILIKE $1
          LIMIT 5`,
         [like]
       ),
@@ -23,8 +22,7 @@ router.get('/', authenticate, async (req, res) => {
         `SELECT 'order' as type, o.id::text, o.project_name as label,
                 COALESCE(c.company_name, c.full_name) as subtitle, o.job_id
          FROM orders o LEFT JOIN clients c ON c.id = o.client_id
-         WHERE (o.project_name ILIKE $1 OR o.job_id ILIKE $1 OR o.job_type ILIKE $1 OR o.notes ILIKE $1)
-           AND o.is_trashed = false
+         WHERE o.project_name ILIKE $1 OR o.job_id ILIKE $1 OR o.job_type ILIKE $1 OR o.notes ILIKE $1
          LIMIT 5`,
         [like]
       ),
@@ -39,8 +37,7 @@ router.get('/', authenticate, async (req, res) => {
       pool.query(
         `SELECT 'task' as type, t.id::text, t.title as label, t.description as subtitle
          FROM tasks t
-         WHERE (t.title ILIKE $1 OR t.description ILIKE $1)
-           AND t.is_trashed = false
+         WHERE t.title ILIKE $1 OR t.description ILIKE $1
          LIMIT 5`,
         [like]
       ),
@@ -48,8 +45,7 @@ router.get('/', authenticate, async (req, res) => {
         `SELECT 'lead' as type, l.id::text, l.title as label,
                 COALESCE(l.company_name, l.contact_name) as subtitle
          FROM leads l
-         WHERE (l.title ILIKE $1 OR l.company_name ILIKE $1 OR l.contact_name ILIKE $1 OR l.description ILIKE $1)
-           AND l.is_trashed = false
+         WHERE l.title ILIKE $1 OR l.company_name ILIKE $1 OR l.contact_name ILIKE $1 OR l.description ILIKE $1
          LIMIT 5`,
         [like]
       ),
