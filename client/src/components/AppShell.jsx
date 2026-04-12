@@ -98,7 +98,8 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
   const [ordersOpen, setOrdersOpen] = useState(isOnOrdersRoute)
 
   useEffect(() => {
-    if (!isOnOrdersRoute) setOrdersOpen(false)
+    if (isOnOrdersRoute) setOrdersOpen(true)
+    else setOrdersOpen(false)
   }, [location.pathname])
 
   function handleOrdersClick() {
@@ -110,7 +111,8 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
   const [tasksOpen, setTasksOpen] = useState(isOnTasksRoute)
 
   useEffect(() => {
-    if (!isOnTasksRoute) setTasksOpen(false)
+    if (isOnTasksRoute) setTasksOpen(true)
+    else setTasksOpen(false)
   }, [location.pathname])
 
   function handleTasksClick() {
@@ -122,7 +124,8 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
   const [leadsOpen, setLeadsOpen] = useState(isOnLeadsRoute)
 
   useEffect(() => {
-    if (!isOnLeadsRoute) setLeadsOpen(false)
+    if (isOnLeadsRoute) setLeadsOpen(true)
+    else setLeadsOpen(false)
   }, [location.pathname])
 
   function handleLeadsClick() {
