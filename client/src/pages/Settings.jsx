@@ -487,7 +487,7 @@ function AppUpdateSection() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm text-foreground">App Version</p>
-          <p className="text-xs text-muted-foreground">Stable v3{updateAvailable ? ' — update available' : ''}</p>
+          <p className="text-xs text-muted-foreground">v3.1.1{updateAvailable ? ' — update available' : ''}</p>
         </div>
         <Button
           size="sm"

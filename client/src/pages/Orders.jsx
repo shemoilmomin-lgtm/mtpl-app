@@ -1743,14 +1743,14 @@ function Orders({ tab = 'active' }) {
       list = list.filter(o => o.date && new Date(o.date) <= to)
     }
     if (filterProforma === 'filled') {
-      list = list.filter(o => o.proforma_number?.trim())
+      list = list.filter(o => o.proforma_invoice_number?.trim())
     } else if (filterProforma === 'empty') {
-      list = list.filter(o => !o.proforma_number?.trim())
+      list = list.filter(o => !o.proforma_invoice_number?.trim())
     }
     if (filterTaxInvoice === 'filled') {
-      list = list.filter(o => o.tax_invoice_number?.trim())
+      list = list.filter(o => o.invoice_number?.trim())
     } else if (filterTaxInvoice === 'empty') {
-      list = list.filter(o => !o.tax_invoice_number?.trim())
+      list = list.filter(o => !o.invoice_number?.trim())
     }
 
     return [...list].sort((a, b) => {
@@ -1776,7 +1776,7 @@ function Orders({ tab = 'active' }) {
     })
   }, [orders, tab, search, clientMap, filterAssignee, filterJobType, filterDateFrom, filterDateTo, filterProforma, filterTaxInvoice, sortBy, sortDir])
 
-  useEffect(() => { setPage(1) }, [filtered])
+  useEffect(() => { setPage(1) }, [tab, search, filterAssignee, filterJobType, filterDateFrom, filterDateTo, filterProforma, filterTaxInvoice, sortBy, sortDir])
 
   const paginated = useMemo(
     () => filtered.slice((page - 1) * perPage, page * perPage),
@@ -1955,16 +1955,17 @@ function Orders({ tab = 'active' }) {
 
       {/* Filter panel */}
       {filtersOpen && (
-        <div className="bg-muted/30 border border-border rounded-xl p-4 flex flex-col gap-4">
-          <div className="flex flex-wrap gap-4">
+        <div className="border border-border rounded-xl p-4 flex flex-col gap-3 bg-background">
+          {/* Row 1: filter controls */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {/* Assignee */}
-            <div className="flex flex-col gap-1.5 min-w-[180px] flex-1">
+            <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-muted-foreground">Assignee</label>
               <Select value={filterAssignee || '_all'} onValueChange={v => setFilterAssignee(v === '_all' ? '' : v)}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="min-w-[180px]">
+                <SelectContent>
                   <SelectItem value="_all">Any</SelectItem>
                   {users.map(u => (
                     <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
@@ -1974,13 +1975,13 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Job type */}
-            <div className="flex flex-col gap-1.5 min-w-[200px] flex-1">
+            <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-muted-foreground">Job Type</label>
               <Select value={filterJobType || '_all'} onValueChange={v => setFilterJobType(v === '_all' ? '' : v)}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="min-w-[200px]">
+                <SelectContent>
                   <SelectItem value="_all">Any</SelectItem>
                   {JOB_TYPES.map(t => (
                     <SelectItem key={t} value={t}>{t}</SelectItem>
@@ -1990,13 +1991,13 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Proforma */}
-            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
-              <label className="text-xs font-medium text-muted-foreground">Proforma</label>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-muted-foreground">Proforma No.</label>
               <Select value={filterProforma || '_all'} onValueChange={v => setFilterProforma(v === '_all' ? '' : v)}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="min-w-[160px]">
+                <SelectContent>
                   <SelectItem value="_all">Any</SelectItem>
                   <SelectItem value="filled">Filled</SelectItem>
                   <SelectItem value="empty">Empty</SelectItem>
@@ -2005,48 +2006,53 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Tax Invoice */}
-            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
-              <label className="text-xs font-medium text-muted-foreground">Tax Invoice</label>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-muted-foreground">Tax Invoice No.</label>
               <Select value={filterTaxInvoice || '_all'} onValueChange={v => setFilterTaxInvoice(v === '_all' ? '' : v)}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="min-w-[160px]">
+                <SelectContent>
                   <SelectItem value="_all">Any</SelectItem>
                   <SelectItem value="filled">Filled</SelectItem>
                   <SelectItem value="empty">Empty</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          {/* Row 2: date + sort */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {/* Date from */}
-            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
+            <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-muted-foreground">Date From</label>
               <Input
                 type="date"
                 value={filterDateFrom}
                 onChange={e => setFilterDateFrom(e.target.value)}
+                className="w-full"
               />
             </div>
 
             {/* Date to */}
-            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
+            <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-muted-foreground">Date To</label>
               <Input
                 type="date"
                 value={filterDateTo}
                 onChange={e => setFilterDateTo(e.target.value)}
+                className="w-full"
               />
             </div>
 
             {/* Sort by */}
-            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
+            <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-muted-foreground">Sort By</label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="min-w-[160px]">
+                <SelectContent>
                   <SelectItem value="job_id">Job ID</SelectItem>
                   <SelectItem value="date">Date</SelectItem>
                   <SelectItem value="status">Status</SelectItem>
@@ -2056,13 +2062,13 @@ function Orders({ tab = 'active' }) {
             </div>
 
             {/* Sort direction */}
-            <div className="flex flex-col gap-1.5 min-w-[160px] flex-1">
+            <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-muted-foreground">Order</label>
               <Select value={sortDir} onValueChange={setSortDir}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="min-w-[160px]">
+                <SelectContent>
                   <SelectItem value="desc">Newest / Z-A</SelectItem>
                   <SelectItem value="asc">Oldest / A-Z</SelectItem>
                 </SelectContent>
