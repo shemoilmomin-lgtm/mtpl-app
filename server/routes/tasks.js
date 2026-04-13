@@ -74,6 +74,7 @@ router.post("/save", authenticate, async (req, res) => {
     client_id,
     order_id,
     assignees,
+    due_date,
   } = req.body;
 
   const VALID_STATUSES = ['in_queue', 'working', 'waiting', 'done'];
@@ -87,9 +88,10 @@ router.post("/save", authenticate, async (req, res) => {
       await pool.query(
         `UPDATE tasks SET
           title=$1, description=$2,
-          client_id=$3, order_id=$4, status=$5
-        WHERE id=$6`,
-        [title, description, client_id, order_id, status, id]
+          client_id=$3, order_id=$4, status=$5,
+          due_date=$6
+        WHERE id=$7`,
+        [title, description, client_id, order_id, status, due_date || null, id]
       );
 
       await pool.query("DELETE FROM task_assignees WHERE task_id=$1", [id]);
@@ -106,6 +108,7 @@ router.post("/save", authenticate, async (req, res) => {
         { key: 'title', label: 'Title' },
         { key: 'status', label: 'Status' },
         { key: 'description', label: 'Description' },
+        { key: 'due_date', label: 'Due Date' },
       ]);
       await logActivity({ userId: req.user.id, action: "edited", entityType: "task", entityId: id, entityLabel: title, message: diff || 'Saved with no changes' });
 
@@ -198,10 +201,10 @@ router.post("/save", authenticate, async (req, res) => {
       res.json({ success: true });
     } else {
       const result = await pool.query(
-        `INSERT INTO tasks (title, description, created_by, client_id, order_id, status)
-        VALUES ($1,$2,$3,$4,$5,$6)
+        `INSERT INTO tasks (title, description, created_by, client_id, order_id, status, due_date)
+        VALUES ($1,$2,$3,$4,$5,$6,$7)
         RETURNING *`,
-        [title, description, created_by, client_id, order_id, status]
+        [title, description, created_by, client_id, order_id, status, due_date || null]
       );
 
       const newTask = result.rows[0];

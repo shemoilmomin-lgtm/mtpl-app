@@ -872,6 +872,21 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
               </div>
             )}
 
+            {/* Due Date */}
+            {task.due_date && (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Due Date</span>
+                <span className={cn(
+                  'text-sm',
+                  task.due_date < new Date().toISOString().slice(0, 10) && task.status !== 'done'
+                    ? 'text-destructive font-medium'
+                    : 'text-foreground'
+                )}>
+                  {formatDate(task.due_date)}
+                </span>
+              </div>
+            )}
+
             {/* Client / Order */}
             {(client || order) && (
               <div className="flex flex-col gap-2">
@@ -1002,6 +1017,7 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
         client_id: task.client_id ? String(task.client_id) : '',
         order_id: task.order_id ? String(task.order_id) : '',
         status: VALID_TASK_STATUSES.includes(task.status) ? task.status : 'in_queue',
+        due_date: task.due_date ?? '',
         reminder_date: '',
         reminder_time: '',
         reminder_user_id: task.assignees?.[0]?.id ? String(task.assignees[0].id) : '',
@@ -1014,6 +1030,7 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
       client_id: '',
       order_id: '',
       status: 'in_queue',
+      due_date: '',
       reminder_date: '',
       reminder_time: '',
       reminder_user_id: '',
@@ -1047,6 +1064,7 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
       client_id: form.client_id ? Number(form.client_id) : null,
       order_id: form.order_id ? Number(form.order_id) : null,
       status: VALID_TASK_STATUSES.includes(form.status) ? form.status : 'in_queue',
+      due_date: form.due_date || null,
       created_by: currentUser?.id,
     }
 
@@ -1134,6 +1152,10 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
               <SelectItem value="done">Done</SelectItem>
             </SelectContent>
           </Select>
+        </Field>
+
+        <Field label="Due Date">
+          <Input type="date" value={form.due_date} onChange={e => set('due_date', e.target.value)} />
         </Field>
 
         <SectionLabel label="Links" />
@@ -1311,6 +1333,7 @@ function Tasks({ tab = 'all' }) {
         client_id: task.client_id || null,
         order_id: task.order_id || null,
         status: newStatus,
+        due_date: task.due_date || null,
         assignees: task.assignees?.map(a => a.id) ?? [],
       }),
     })
@@ -1508,6 +1531,16 @@ function Tasks({ tab = 'all' }) {
                         {client.company_name || client.full_name}
                       </span>
                     )}
+                    {task.due_date && (
+                      <span className={cn(
+                        'text-[11px] shrink-0',
+                        task.due_date < new Date().toISOString().slice(0, 10) && task.status !== 'done'
+                          ? 'text-destructive font-medium'
+                          : 'text-muted-foreground'
+                      )}>
+                        Due {formatDate(task.due_date)}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col items-end justify-between shrink-0 gap-2">
@@ -1555,7 +1588,7 @@ function Tasks({ tab = 'all' }) {
               <TableHead className="text-xs font-medium text-muted-foreground w-[18%]">Assigned To</TableHead>
               <TableHead className="text-xs font-medium text-muted-foreground w-[15%]">Client</TableHead>
               <TableHead className="text-xs font-medium text-muted-foreground w-[10%]">Status</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[10%]">Date</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground w-[10%]">Due Date</TableHead>
               <TableHead className="w-[4%]" />
             </TableRow>
           </TableHeader>
@@ -1625,7 +1658,14 @@ function Tasks({ tab = 'all' }) {
                     <TableCell>
                       <TaskStatusSelect task={task} onStatusChange={handleStatusChange} />
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{formatDate(task.created_at)}</TableCell>
+                    <TableCell className={cn(
+                      'text-sm',
+                      task.due_date && task.due_date < new Date().toISOString().slice(0, 10) && task.status !== 'done'
+                        ? 'text-destructive font-medium'
+                        : 'text-muted-foreground'
+                    )}>
+                      {task.due_date ? formatDate(task.due_date) : '—'}
+                    </TableCell>
                     <TableCell onClick={e => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

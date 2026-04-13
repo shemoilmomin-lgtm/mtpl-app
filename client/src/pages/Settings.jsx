@@ -520,7 +520,7 @@ function AppUpdateSection() {
       <div className="flex items-center justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-foreground">App Version</p>
-          <p className="text-xs text-muted-foreground">v3.1.6</p>
+          <p className="text-xs text-muted-foreground">v3.1.7</p>
         </div>
         {updateAvailable && (
           <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full shrink-0">
@@ -894,7 +894,7 @@ function Settings() {
       {activeTab === 'feedback' && <FeedbackTab token={token} />}
       {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
 
-      <p className="text-xs text-muted-foreground/50 pt-2">v3.1.6</p>
+      <p className="text-xs text-muted-foreground/50 pt-2">v3.1.7</p>
     </div>
   )
 }
