@@ -382,18 +382,41 @@ function ClientCombobox({ clients, value, onChange }) {
 
 // ─── Quotation combobox ───────────────────────────────────────────────────────
 
-function QuotationCombobox({ quotations, value, onChange }) {
+function QuotationCombobox({ quotations, clients, value, onChange }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const selected = quotations.find(q => q.id === value)
+
+  const clientMap = useMemo(
+    () => Object.fromEntries((clients || []).map(c => [c.id, c])),
+    [clients]
+  )
 
   function getTotal(q) {
     return (q.items || []).reduce((sum, i) => sum + (Number(i.amount) || 0), 0)
   }
 
-  const filtered = query
-    ? quotations.filter(q => q.quotation_id?.toLowerCase().includes(query.toLowerCase()))
-    : quotations
+  function getClientLabel(q) {
+    if (q.manual_client_name?.trim()) return q.manual_client_name.trim()
+    const c = clientMap[q.client_id]
+    return c?.company_name || c?.full_name || ''
+  }
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return quotations
+    const q = query.toLowerCase()
+    return quotations.filter(qt => {
+      const clientLabel = getClientLabel(qt).toLowerCase()
+      const total = getTotal(qt).toString()
+      return (
+        qt.quotation_id?.toLowerCase().includes(q) ||
+        qt.subject?.toLowerCase().includes(q) ||
+        qt.manual_client_name?.toLowerCase().includes(q) ||
+        clientLabel.includes(q) ||
+        total.includes(q)
+      )
+    })
+  }, [quotations, query, clientMap])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -404,19 +427,19 @@ function QuotationCombobox({ quotations, value, onChange }) {
         >
           <span className={cn('truncate flex-1', !selected && 'text-muted-foreground')}>
             {selected
-              ? `${selected.quotation_id} — ₹${getTotal(selected).toLocaleString('en-IN')}`
+              ? `${selected.quotation_id}${getClientLabel(selected) ? ` — ${getClientLabel(selected)}` : ''} — ₹${getTotal(selected).toLocaleString('en-IN')}`
               : 'Search quotation…'}
           </span>
           <ChevronsUpDown size={14} className="shrink-0 text-muted-foreground ml-2" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-0" align="start">
+      <PopoverContent className="w-80 p-0" align="start">
         <div className="p-2 border-b border-border">
           <input
             autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search by quotation ID…"
+            placeholder="Search by ID, client, subject, amount…"
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
@@ -424,22 +447,29 @@ function QuotationCombobox({ quotations, value, onChange }) {
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
-            filtered.map(q => (
-              <button
-                key={q.id}
-                type="button"
-                onClick={() => { onChange(q); setOpen(false); setQuery('') }}
-                className={cn(
-                  'flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-muted',
-                  value === q.id && 'text-primary'
-                )}
-              >
-                <span>{q.quotation_id}</span>
-                <span className="text-xs text-muted-foreground">
-                  ₹{getTotal(q).toLocaleString('en-IN')}
-                </span>
-              </button>
-            ))
+            filtered.map(q => {
+              const clientLabel = getClientLabel(q)
+              return (
+                <button
+                  key={q.id}
+                  type="button"
+                  onClick={() => { onChange(q); setOpen(false); setQuery('') }}
+                  className={cn(
+                    'flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-muted gap-2',
+                    value === q.id && 'text-primary'
+                  )}
+                >
+                  <div className="flex flex-col items-start min-w-0">
+                    <span className="font-mono text-xs">{q.quotation_id}</span>
+                    {clientLabel && <span className="text-xs text-muted-foreground truncate">{clientLabel}</span>}
+                    {q.subject && <span className="text-xs text-muted-foreground truncate">{q.subject}</span>}
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    ₹{getTotal(q).toLocaleString('en-IN')}
+                  </span>
+                </button>
+              )
+            })
           )}
         </div>
         {value && (
@@ -1539,6 +1569,7 @@ function OrderForm({ order, clients, users, quotations, token, currentUser, onSa
           {form.quotation_mode === 'linked' && (
             <QuotationCombobox
               quotations={quotations}
+              clients={clients}
               value={form.quotation_ref_id}
               onChange={q => {
                 if (q) {
@@ -2188,8 +2219,8 @@ function Orders({ tab = 'active' }) {
               <TableHead className="text-xs font-medium text-muted-foreground min-w-[90px]">Date</TableHead>
               <TableHead className="text-xs font-medium text-muted-foreground min-w-[120px]">Client</TableHead>
               <TableHead className="text-xs font-medium text-muted-foreground min-w-[130px]">Project / Type</TableHead>
-              <TableHead className="hidden xl:table-cell text-xs font-medium text-muted-foreground min-w-[110px]">Proforma No.</TableHead>
-              <TableHead className="hidden xl:table-cell text-xs font-medium text-muted-foreground min-w-[110px]">Tax Invoice No.</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[110px]">Proforma No.</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[110px]">Tax Invoice No.</TableHead>
               <TableHead className="text-xs font-medium text-muted-foreground min-w-[100px]">Assigned To</TableHead>
               <TableHead className="text-xs font-medium text-muted-foreground min-w-[130px]">Status</TableHead>
               <TableHead className="w-10" />
@@ -2241,7 +2272,7 @@ function Orders({ tab = 'active' }) {
                       </div>
                     </TableCell>
 
-                    <TableCell className="hidden xl:table-cell">
+                    <TableCell>
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs text-muted-foreground">
                           {order.proforma_invoice_number || '—'}
@@ -2252,7 +2283,7 @@ function Orders({ tab = 'active' }) {
                       </div>
                     </TableCell>
 
-                    <TableCell className="hidden xl:table-cell">
+                    <TableCell>
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs text-muted-foreground">
                           {order.invoice_number || '—'}
