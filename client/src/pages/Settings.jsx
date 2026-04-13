@@ -457,7 +457,7 @@ function PreferencesTab({ token, isSuperadmin }) {
 
 function AppUpdateSection() {
   const [updateAvailable, setUpdateAvailable] = useState(() => !!window.__swUpdateAvailable)
-  const [updating, setUpdating] = useState(false)
+  const [checkState, setCheckState] = useState('idle') // 'idle' | 'checking' | 'uptodate' | 'updating'
 
   useEffect(() => {
     function onUpdate() { setUpdateAvailable(true) }
@@ -465,37 +465,45 @@ function AppUpdateSection() {
     return () => window.removeEventListener('swUpdateAvailable', onUpdate)
   }, [])
 
-  function handleUpdate() {
+  async function handleUpdate() {
     const reg = window.__swRegistration
     if (reg?.waiting) {
-      setUpdating(true)
+      setCheckState('updating')
       reg.waiting.postMessage({ type: 'SKIP_WAITING' })
       // controllerchange in main.jsx will reload the page
     } else {
-      // No waiting SW — check for update manually
-      reg?.update().then(() => {
-        if (!window.__swUpdateAvailable) {
-          // briefly show "up to date" state
-          setUpdateAvailable(false)
-        }
-      }).catch(() => {})
+      setCheckState('checking')
+      try {
+        await reg?.update()
+      } catch {}
+      if (window.__swUpdateAvailable) {
+        setUpdateAvailable(true)
+        setCheckState('idle')
+      } else {
+        setCheckState('uptodate')
+        setTimeout(() => setCheckState('idle'), 2500)
+      }
     }
   }
 
+  const isChecking = checkState === 'checking'
+  const isUpdating = checkState === 'updating'
+  const isUpToDate = checkState === 'uptodate'
+
   return (
-    <div className="md:hidden pt-2 border-t border-border">
+    <div className="lg:hidden pt-2 border-t border-border">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm text-foreground">App Version</p>
-          <p className="text-xs text-muted-foreground">v3.1.1{updateAvailable ? ' — update available' : ''}</p>
+          <p className="text-xs text-muted-foreground">v3.1.2{updateAvailable ? ' — update available' : ''}</p>
         </div>
         <Button
           size="sm"
           variant={updateAvailable ? 'default' : 'outline'}
           onClick={handleUpdate}
-          disabled={updating}
+          disabled={isChecking || isUpdating}
         >
-          {updating ? 'Updating…' : updateAvailable ? 'Update Now' : 'Check for Updates'}
+          {isUpdating ? 'Updating…' : isChecking ? 'Checking…' : isUpToDate ? 'Up to date' : updateAvailable ? 'Update Now' : 'Check for Updates'}
         </Button>
       </div>
     </div>
@@ -829,7 +837,7 @@ function Settings() {
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <p className="text-sm text-muted-foreground mt-0.5">Manage your preferences and app configuration</p>
       </div>
 

@@ -2099,8 +2099,8 @@ function Orders({ tab = 'active' }) {
         </div>
       )}
 
-      {/* Mobile card list */}
-      <div className="md:hidden rounded-2xl ring-1 ring-foreground/5 divide-y divide-border overflow-hidden">
+      {/* Mobile / tablet-portrait card list */}
+      <div className="lg:hidden rounded-2xl ring-1 ring-foreground/5 divide-y divide-border overflow-hidden">
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground text-sm py-12">No orders found.</p>
         ) : (
@@ -2179,20 +2179,20 @@ function Orders({ tab = 'active' }) {
         )}
       </div>
 
-      {/* Desktop table */}
-      <div className="hidden md:block rounded-2xl ring-1 ring-foreground/5 overflow-x-auto">
-        <Table className="table-fixed min-w-[900px]">
+      {/* Tablet-landscape / desktop table */}
+      <div className="hidden lg:block rounded-2xl ring-1 ring-foreground/5 overflow-x-auto">
+        <Table className="w-full">
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-xs font-medium text-muted-foreground w-[13%]">Job ID</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[9%]">Date</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[14%]">Client</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[16%]">Project / Type</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[11%]">Proforma No.</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[11%]">Tax Invoice No.</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[11%]">Assigned To</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground w-[11%]">Status</TableHead>
-              <TableHead className="w-[4%]" />
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[110px]">Job ID</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[90px]">Date</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[120px]">Client</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[130px]">Project / Type</TableHead>
+              <TableHead className="hidden xl:table-cell text-xs font-medium text-muted-foreground min-w-[110px]">Proforma No.</TableHead>
+              <TableHead className="hidden xl:table-cell text-xs font-medium text-muted-foreground min-w-[110px]">Tax Invoice No.</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[100px]">Assigned To</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground min-w-[130px]">Status</TableHead>
+              <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -2241,7 +2241,7 @@ function Orders({ tab = 'active' }) {
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="hidden xl:table-cell">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs text-muted-foreground">
                           {order.proforma_invoice_number || '—'}
@@ -2252,7 +2252,7 @@ function Orders({ tab = 'active' }) {
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="hidden xl:table-cell">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs text-muted-foreground">
                           {order.invoice_number || '—'}

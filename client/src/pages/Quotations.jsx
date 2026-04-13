@@ -1409,7 +1409,7 @@ function Quotations() {
       </div>
 
       {/* Mobile card list */}
-      <div className="md:hidden rounded-2xl ring-1 ring-foreground/5 divide-y divide-border overflow-hidden">
+      <div className="lg:hidden rounded-2xl ring-1 ring-foreground/5 divide-y divide-border overflow-hidden">
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground text-sm py-12">No quotations found.</p>
         ) : (
@@ -1468,7 +1468,7 @@ function Quotations() {
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block rounded-2xl ring-1 ring-foreground/5 overflow-x-auto">
+      <div className="hidden lg:block rounded-2xl ring-1 ring-foreground/5 overflow-x-auto">
         <Table className="table-fixed min-w-[700px]">
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">

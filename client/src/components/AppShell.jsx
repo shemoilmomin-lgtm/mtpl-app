@@ -280,14 +280,14 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside className={cn(
         'fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-border bg-card transition-transform duration-200',
-        'md:relative md:w-60 md:z-auto md:translate-x-0 shrink-0',
+        'lg:relative lg:w-60 lg:z-auto lg:translate-x-0 shrink-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
         {/* Logo + mobile close */}
@@ -295,7 +295,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
           <img src="/logo.svg" alt="MTPL" className="h-10 invert dark:invert-0" />
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden text-muted-foreground hover:text-foreground absolute right-4"
+            className="lg:hidden text-muted-foreground hover:text-foreground absolute right-4"
           >
             <X size={18} />
           </button>
@@ -465,7 +465,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
+        <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-muted-foreground hover:text-foreground"
@@ -526,12 +526,12 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         </div>
 
         {/* Mobile search bar */}
-        <div className="md:hidden px-3 py-2 border-b border-border bg-card shrink-0">
+        <div className="lg:hidden px-3 py-2 border-b border-border bg-card shrink-0">
           <SearchBar token={token} className="w-full" />
         </div>
 
         {/* Desktop content header */}
-        <div className="hidden md:flex items-center gap-4 px-6 py-4 border-b border-border bg-card shrink-0">
+        <div className="hidden lg:flex items-center gap-4 px-6 py-4 border-b border-border bg-card shrink-0">
           <div className="shrink-0">
             <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
             {location.pathname === '/dashboard' && user?.name && (
@@ -571,19 +571,19 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 md:pb-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 lg:pb-6">
           {children}
         </div>
       </main>
 
       {/* Activity feed panel — full overlay on mobile, side panel on desktop */}
       {feedOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-card flex flex-col">
+        <div className="fixed inset-0 z-50 lg:hidden bg-card flex flex-col">
           <ActivityFeedPanel token={token} onClose={() => setFeedOpen(false)} />
         </div>
       )}
       <div className={cn(
-        'hidden md:block shrink-0 border-l border-border bg-card overflow-hidden transition-[width] duration-200',
+        'hidden lg:block shrink-0 border-l border-border bg-card overflow-hidden transition-[width] duration-200',
         feedOpen ? 'w-80' : 'w-0'
       )}>
         {feedOpen && (
@@ -596,7 +596,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
 
       {/* Notifications panel */}
       {notifOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-card flex flex-col">
+        <div className="fixed inset-0 z-50 lg:hidden bg-card flex flex-col">
           <NotificationsPanel
             token={token}
             userId={user?.id}
@@ -606,7 +606,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         </div>
       )}
       <div className={cn(
-        'hidden md:block shrink-0 border-l border-border bg-card overflow-hidden transition-[width] duration-200',
+        'hidden lg:block shrink-0 border-l border-border bg-card overflow-hidden transition-[width] duration-200',
         notifOpen ? 'w-80' : 'w-0'
       )}>
         {notifOpen && (
@@ -619,8 +619,8 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         )}
       </div>
 
-      {/* Mobile bottom navigation bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border flex items-stretch h-16 safe-area-inset-bottom">
+      {/* Mobile / tablet-portrait bottom navigation bar */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border flex items-stretch h-16 safe-area-inset-bottom">
         {[
           { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
           { to: '/orders',    icon: ShoppingBag,     label: 'Orders' },
