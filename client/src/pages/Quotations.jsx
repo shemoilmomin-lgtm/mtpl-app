@@ -144,7 +144,7 @@ function ClientCombobox({ clients, value, onChange }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="max-h-60 overflow-y-auto py-1">
+        <div className="max-h-60 overflow-y-auto overscroll-y-contain py-1">
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
@@ -228,7 +228,7 @@ function LeadCombobox({ leads, value, onChange }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="max-h-60 overflow-y-auto py-1">
+        <div className="max-h-60 overflow-y-auto overscroll-y-contain py-1">
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
@@ -311,7 +311,7 @@ function OrderCombobox({ orders, value, onChange }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="max-h-60 overflow-y-auto py-1">
+        <div className="max-h-60 overflow-y-auto overscroll-y-contain py-1">
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
@@ -871,10 +871,12 @@ function QuotationView({ quotation, clientMap, userMap, onEdit, onClose, onDupli
             {/* Totals */}
             <div className="rounded-xl border border-border overflow-hidden">
               <div className="flex flex-col divide-y divide-border">
-                <div className="flex items-center justify-between px-4 py-2.5">
-                  <span className="text-xs text-muted-foreground">Subtotal</span>
-                  <span className="text-sm tabular-nums">{formatAmount(subtotal)}</span>
-                </div>
+                {discValue > 0 && (
+                  <div className="flex items-center justify-between px-4 py-2.5">
+                    <span className="text-xs text-muted-foreground">Subtotal</span>
+                    <span className="text-sm tabular-nums">{formatAmount(subtotal)}</span>
+                  </div>
+                )}
                 {discValue > 0 && (
                   <div className="flex items-center justify-between px-4 py-2.5">
                     <span className="text-xs text-muted-foreground">
@@ -1304,10 +1306,12 @@ function QuotationForm({ quotation, clients, users, leads = [], orders = [], tok
       {/* Live total preview */}
       <div className="shrink-0 border-t border-border px-4 sm:px-6 py-3">
         <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2.5">
-            <span className="text-xs text-muted-foreground">Subtotal</span>
-            <span className="text-sm tabular-nums">{formatAmount(subtotal)}</span>
-          </div>
+          {discValue > 0 && (
+            <div className="flex items-center justify-between px-4 py-2.5">
+              <span className="text-xs text-muted-foreground">Subtotal</span>
+              <span className="text-sm tabular-nums">{formatAmount(subtotal)}</span>
+            </div>
+          )}
           {discValue > 0 && (
             <div className="flex items-center justify-between px-4 py-2.5">
               <span className="text-xs text-muted-foreground">Discount</span>

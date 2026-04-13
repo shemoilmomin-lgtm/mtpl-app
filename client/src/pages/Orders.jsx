@@ -339,7 +339,7 @@ function ClientCombobox({ clients, value, onChange }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="max-h-60 overflow-y-auto py-1">
+        <div className="max-h-60 overflow-y-auto overscroll-y-contain py-1">
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
@@ -423,13 +423,19 @@ function QuotationCombobox({ quotations, clients, value, onChange }) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="flex h-9 w-full items-center justify-between rounded-3xl border border-transparent bg-input/50 px-3 text-sm text-left transition-colors focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
+          className="flex min-h-9 w-full items-center justify-between rounded-3xl border border-transparent bg-input/50 px-3 py-2 text-sm text-left transition-colors focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
         >
-          <span className={cn('truncate flex-1', !selected && 'text-muted-foreground')}>
-            {selected
-              ? `${selected.quotation_id}${getClientLabel(selected) ? ` — ${getClientLabel(selected)}` : ''} — ₹${getTotal(selected).toLocaleString('en-IN')}`
-              : 'Search quotation…'}
-          </span>
+          {selected ? (
+            <div className="flex flex-col min-w-0 flex-1">
+              {getClientLabel(selected) && (
+                <span className="text-sm font-medium text-foreground truncate">{getClientLabel(selected)}</span>
+              )}
+              <span className="text-xs text-muted-foreground font-mono">{selected.quotation_id}</span>
+              <span className="text-xs text-muted-foreground">₹{getTotal(selected).toLocaleString('en-IN')}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground flex-1">Search quotation…</span>
+          )}
           <ChevronsUpDown size={14} className="shrink-0 text-muted-foreground ml-2" />
         </button>
       </PopoverTrigger>
@@ -443,7 +449,7 @@ function QuotationCombobox({ quotations, clients, value, onChange }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="max-h-56 overflow-y-auto py-1">
+        <div className="max-h-56 overflow-y-auto overscroll-y-contain py-1">
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (

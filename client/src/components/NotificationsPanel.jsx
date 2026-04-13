@@ -40,7 +40,17 @@ export function NotificationsPanel({ token, userId, onClose, onUnreadChange }) {
       const data = await fetch(`${API}/notifications/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       }).then(r => r.json())
-      setItems(Array.isArray(data) ? data : [])
+      const notifications = Array.isArray(data) ? data : []
+      setItems(notifications)
+      // Auto-mark all as read when panel opens
+      if (notifications.some(n => !n.is_read)) {
+        await fetch(`${API}/notifications/mark-read/${userId}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        setItems(prev => prev.map(n => ({ ...n, is_read: true })))
+        onUnreadChange?.(0)
+      }
     } catch {}
     setLoading(false)
   }

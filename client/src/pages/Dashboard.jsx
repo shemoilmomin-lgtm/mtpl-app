@@ -9,6 +9,7 @@ import {
 import {
   CheckSquare, Activity, ShoppingBag, TrendingUp, FileText,
   ChevronLeft, ChevronRight, Clock, ListChecks,
+  Bell, UserPlus, RefreshCw, Pencil, Link,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -398,58 +399,61 @@ function RecentLeads({ leads }) {
   )
 }
 
-// ─── Recent Orders ────────────────────────────────────────────────────────────
-function RecentOrders({ orders, clients }) {
-  const navigate = useNavigate()
-  const clientMap = useMemo(() => {
-    const m = {}
-    clients.forEach(c => { m[c.id] = c })
-    return m
-  }, [clients])
+// ─── Recent Notifications ─────────────────────────────────────────────────────
+const NOTIF_ICON = {
+  assigned:              { Icon: UserPlus,  color: 'text-blue-500' },
+  status_changed:        { Icon: RefreshCw, color: 'text-yellow-500' },
+  description_changed:   { Icon: FileText,  color: 'text-purple-500' },
+  title_changed:         { Icon: Pencil,    color: 'text-cyan-500' },
+  linked_client_changed: { Icon: Link,      color: 'text-emerald-500' },
+  linked_order_changed:  { Icon: Link,      color: 'text-emerald-500' },
+  reminder:              { Icon: Bell,      color: 'text-orange-500' },
+}
 
-  const recent = [...orders]
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 6)
+function formatRelTime(str) {
+  if (!str) return ''
+  const normalized = str.endsWith('Z') || str.includes('+') ? str : str + 'Z'
+  const diff = Date.now() - new Date(normalized).getTime()
+  const m = Math.floor(diff / 60000)
+  if (m < 1) return 'just now'
+  if (m < 60) return `${m}m ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h ago`
+  const d = Math.floor(h / 24)
+  return d < 7 ? `${d}d ago` : new Date(str).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+}
 
-  const statusColor = {
-    pending:      'bg-sky-500/15 text-sky-600 dark:text-sky-400',
-    working:      'bg-amber-500/15 text-amber-600 dark:text-amber-400',
-    waiting:      'bg-orange-500/15 text-orange-600 dark:text-orange-400',
-    dispatched:   'bg-violet-500/15 text-violet-600 dark:text-violet-400',
-    completed:    'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
-    long_pending: 'bg-red-500/15 text-red-500',
-  }
+function RecentNotifications({ token, userId }) {
+  const [items, setItems] = useState([])
+
+  useEffect(() => {
+    if (!token || !userId) return
+    fetch(`/api/notifications/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(data => setItems(Array.isArray(data) ? data.slice(0, 6) : []))
+      .catch(() => {})
+  }, [token, userId])
 
   return (
     <div className="bg-card rounded-2xl p-5 ring-1 ring-foreground/5 flex flex-col gap-4">
       <div>
-        <p className="text-sm font-semibold text-foreground">Recent Orders</p>
-        <p className="text-xs text-muted-foreground mt-0.5">Latest activity</p>
+        <p className="text-sm font-semibold text-foreground">Notifications</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Recent activity</p>
       </div>
-      {recent.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No orders yet.</p>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No notifications yet.</p>
       ) : (
         <div className="flex flex-col divide-y divide-border">
-          {recent.map((o) => {
-            const client = clientMap[o.client_id]
+          {items.map(n => {
+            const cfg = NOTIF_ICON[n.notification_type] || { Icon: Bell, color: 'text-muted-foreground' }
             return (
-              <div
-                key={o.id}
-                className="flex items-center justify-between py-2.5 gap-3 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-colors"
-                onClick={() => navigate('/orders', { state: { openOrderId: o.id } })}
-              >
-                <div className="min-w-0">
-                  <p className="text-sm text-foreground truncate font-medium">{o.project_name || '—'}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {client?.company_name || client?.full_name || o.job_id || '—'}
-                  </p>
+              <div key={n.id} className="flex items-start gap-2.5 py-2.5">
+                <cfg.Icon size={13} className={cn('mt-0.5 shrink-0', cfg.color)} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-foreground leading-relaxed line-clamp-2">{n.message}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{formatRelTime(n.created_at)}</p>
                 </div>
-                <span className={cn(
-                  'text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 capitalize',
-                  statusColor[o.status] || 'bg-muted text-muted-foreground'
-                )}>
-                  {(o.status || 'pending').replace('_', ' ')}
-                </span>
+                {!n.is_read && <span className="size-1.5 rounded-full bg-blue-500 shrink-0 mt-1" />}
               </div>
             )
           })}
@@ -555,10 +559,10 @@ function Dashboard() {
         <TaskBreakdown tasks={tasks} />
       </div>
 
-      {/* Calendar + Recent Orders + My Tasks + Recent Leads */}
+      {/* Calendar + Notifications + My Tasks + Recent Leads */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <DeliveryCalendar orders={orders} />
-        <RecentOrders orders={orders} clients={clients} />
+        <RecentNotifications token={token} userId={user?.id} />
         <MyTasks tasks={tasks} user={user} />
         <RecentLeads leads={leads} />
       </div>

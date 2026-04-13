@@ -495,7 +495,7 @@ function AppUpdateSection() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm text-foreground">App Version</p>
-          <p className="text-xs text-muted-foreground">v3.1.3{updateAvailable ? ' — update available' : ''}</p>
+          <p className="text-xs text-muted-foreground">v3.1.4{updateAvailable ? ' — update available' : ''}</p>
         </div>
         <Button
           size="sm"
@@ -864,7 +864,7 @@ function Settings() {
       {activeTab === 'feedback' && <FeedbackTab token={token} />}
       {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
 
-      <p className="text-xs text-muted-foreground/50 pt-2">v3.1.3</p>
+      <p className="text-xs text-muted-foreground/50 pt-2">v3.1.4</p>
     </div>
   )
 }

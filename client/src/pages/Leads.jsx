@@ -170,7 +170,7 @@ function ClientCombobox({ clients, value, onChange }) {
             placeholder="Search by name, phone, email…"
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
         </div>
-        <div className="max-h-60 overflow-y-auto py-1">
+        <div className="max-h-60 overflow-y-auto overscroll-y-contain py-1">
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
