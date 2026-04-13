@@ -339,7 +339,7 @@ function ClientCombobox({ clients, value, onChange }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="max-h-60 overflow-y-auto overscroll-y-contain py-1">
+        <div className="max-h-60 overflow-y-auto overscroll-y-contain py-1" onWheel={e => e.stopPropagation()}>
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
@@ -449,7 +449,7 @@ function QuotationCombobox({ quotations, clients, value, onChange }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="max-h-56 overflow-y-auto overscroll-y-contain py-1">
+        <div className="max-h-56 overflow-y-auto overscroll-y-contain py-1" onWheel={e => e.stopPropagation()}>
           {filtered.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-4 text-center">No results</p>
           ) : (
