@@ -380,6 +380,15 @@ function ClientCombobox({ clients, value, onChange }) {
   )
 }
 
+// ─── Quotation helpers ────────────────────────────────────────────────────────
+
+function quotationLabel(q) {
+  if (!q) return ''
+  return q.id <= 41
+    ? `QT-${String(q.id).padStart(4, '0')}`
+    : `MTPLQ-${String(q.id).padStart(4, '0')}`
+}
+
 // ─── Quotation combobox ───────────────────────────────────────────────────────
 
 function QuotationCombobox({ quotations, clients, value, onChange }) {
@@ -409,7 +418,7 @@ function QuotationCombobox({ quotations, clients, value, onChange }) {
       const clientLabel = getClientLabel(qt).toLowerCase()
       const total = getTotal(qt).toString()
       return (
-        qt.quotation_id?.toLowerCase().includes(q) ||
+        quotationLabel(qt).toLowerCase().includes(q) ||
         qt.subject?.toLowerCase().includes(q) ||
         qt.manual_client_name?.toLowerCase().includes(q) ||
         clientLabel.includes(q) ||
@@ -430,7 +439,7 @@ function QuotationCombobox({ quotations, clients, value, onChange }) {
               {getClientLabel(selected) && (
                 <span className="text-sm font-medium text-foreground truncate">{getClientLabel(selected)}</span>
               )}
-              <span className="text-xs text-muted-foreground font-mono">{selected.quotation_id}</span>
+              <span className="text-xs text-muted-foreground font-mono">{quotationLabel(selected)}</span>
               <span className="text-xs text-muted-foreground">₹{getTotal(selected).toLocaleString('en-IN')}</span>
             </div>
           ) : (
@@ -466,7 +475,7 @@ function QuotationCombobox({ quotations, clients, value, onChange }) {
                   )}
                 >
                   <div className="flex flex-col items-start min-w-0">
-                    <span className="font-mono text-xs">{q.quotation_id}</span>
+                    <span className="font-mono text-xs">{quotationLabel(q)}</span>
                     {clientLabel && <span className="text-xs text-muted-foreground truncate">{clientLabel}</span>}
                     {q.subject && <span className="text-xs text-muted-foreground truncate">{q.subject}</span>}
                   </div>
@@ -1166,7 +1175,7 @@ function OrderView({
     : (Number(order.quotation_manual_amount) || 0)
 
   const quotationRef = linkedQuotation
-    ? linkedQuotation.quotation_id
+    ? quotationLabel(linkedQuotation)
     : (order.quotation_manual_no || null)
 
   const isExecutive = currentUser?.role === 'executive'
