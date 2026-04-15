@@ -1026,14 +1026,14 @@ function TaskForm({ task, clients, orders, users, clientMap, token, currentUser,
     return {
       title: '',
       description: '',
-      assignees: [],
+      assignees: currentUser?.id ? [currentUser.id] : [],
       client_id: '',
       order_id: '',
       status: 'in_queue',
       due_date: '',
       reminder_date: '',
       reminder_time: '',
-      reminder_user_id: '',
+      reminder_user_id: currentUser?.id ? String(currentUser.id) : '',
     }
   }
 

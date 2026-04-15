@@ -1,0 +1,16 @@
+# Changelog
+
+## v3.1.8 — 2026-04-15
+- Tasks: Create Task form now auto-assigns the logged-in user by default
+
+## v3.1.7 — Previous
+- Tasks: due date field added to tasks
+
+## v3.1.6 — Previous
+- Quotations: normalize quotation IDs to MTPLQ format
+
+## v3.1.5 — Previous
+- UI: dropdown scroll fix, PWA update fix, update UI redesign
+
+## v3.1.4 — Previous
+- Notifications: badge fix, scroll fix, dashboard notifications
