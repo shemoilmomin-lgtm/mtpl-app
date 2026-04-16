@@ -456,85 +456,14 @@ function PreferencesTab({ token, isSuperadmin }) {
 // ── App update ────────────────────────────────────────────────────────────────
 
 function AppUpdateSection() {
-  const [updateAvailable, setUpdateAvailable] = useState(() => !!window.__swUpdateAvailable)
-  const [checkState, setCheckState] = useState('idle') // 'idle' | 'checking' | 'uptodate' | 'updating'
-
-  useEffect(() => {
-    function onUpdate() { setUpdateAvailable(true); setCheckState('idle') }
-    window.addEventListener('swUpdateAvailable', onUpdate)
-    return () => window.removeEventListener('swUpdateAvailable', onUpdate)
-  }, [])
-
-  function handleUpdate() {
-    const reg = window.__swRegistration
-    if (reg?.waiting) {
-      setCheckState('updating')
-      reg.waiting.postMessage({ type: 'SKIP_WAITING' })
-      return
-    }
-
-    setCheckState('checking')
-
-    // Wait for either swUpdateAvailable event or a timeout to decide result
-    let resolved = false
-    function onUpdate() {
-      if (resolved) return
-      resolved = true
-      window.removeEventListener('swUpdateAvailable', onUpdate)
-      setUpdateAvailable(true)
-      setCheckState('idle')
-    }
-    window.addEventListener('swUpdateAvailable', onUpdate)
-
-    reg?.update()
-      .then(() => {
-        // Give the new SW up to 4s to reach installed state before giving up
-        setTimeout(() => {
-          if (resolved) return
-          resolved = true
-          window.removeEventListener('swUpdateAvailable', onUpdate)
-          if (window.__swUpdateAvailable) {
-            setUpdateAvailable(true)
-            setCheckState('idle')
-          } else {
-            setCheckState('uptodate')
-            setTimeout(() => setCheckState('idle'), 2500)
-          }
-        }, 4000)
-      })
-      .catch(() => {
-        if (resolved) return
-        resolved = true
-        window.removeEventListener('swUpdateAvailable', onUpdate)
-        setCheckState('uptodate')
-        setTimeout(() => setCheckState('idle'), 2500)
-      })
-  }
-
-  const isChecking = checkState === 'checking'
-  const isUpdating = checkState === 'updating'
-  const isUpToDate = checkState === 'uptodate'
-
   return (
     <div className="lg:hidden pt-3 border-t border-border flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-sm font-medium text-foreground">App Version</p>
-          <p className="text-xs text-muted-foreground">v3.1.8</p>
-        </div>
-        {updateAvailable && (
-          <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full shrink-0">
-            Update available
-          </span>
-        )}
+      <div>
+        <p className="text-sm font-medium text-foreground">App Version</p>
+        <p className="text-xs text-muted-foreground">v3.1.9</p>
       </div>
-      <Button
-        className="w-full"
-        variant={updateAvailable ? 'default' : 'outline'}
-        onClick={handleUpdate}
-        disabled={isChecking || isUpdating}
-      >
-        {isUpdating ? 'Updating…' : isChecking ? 'Checking for updates…' : isUpToDate ? 'Up to date' : updateAvailable ? 'Update Now' : 'Check for Updates'}
+      <Button className="w-full" variant="outline" onClick={() => window.location.reload()}>
+        Refresh
       </Button>
     </div>
   )
@@ -894,7 +823,7 @@ function Settings() {
       {activeTab === 'feedback' && <FeedbackTab token={token} />}
       {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
 
-      <p className="text-xs text-muted-foreground/50 pt-2">v3.1.8</p>
+      <p className="text-xs text-muted-foreground/50 pt-2">v3.1.9</p>
     </div>
   )
 }
