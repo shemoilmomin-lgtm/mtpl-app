@@ -72,9 +72,9 @@ export function SearchBar({ token, className = '' }) {
     if (item.type === 'comment') {
       const map = { order: 'openOrderId', task: 'openTaskId', lead: 'openLeadId', quotation: 'openQuotationId' }
       const key = map[item.entity_type]
-      navigate(`/${item.entity_type}s`, key ? { state: { [key]: item.entity_id } } : undefined)
+      navigate(`/${item.entity_type}s`, key ? { state: { [key]: Number(item.entity_id) } } : undefined)
     } else if (nav) {
-      navigate(nav.path, { state: { [nav.key]: item.id } })
+      navigate(nav.path, { state: { [nav.key]: Number(item.id) } })
     }
     setQuery('')
     setResults([])
