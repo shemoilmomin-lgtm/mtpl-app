@@ -1436,8 +1436,11 @@ function Quotations() {
       navigate(location.pathname, { replace: true, state: {} })
     }
     if (location.state?.openQuotationId) {
-      pendingOpenQuotationId.current = location.state.openQuotationId
+      const id = location.state.openQuotationId
       navigate(location.pathname, { replace: true, state: {} })
+      const found = quotations.find(q => q.id === id)
+      if (found) { setSelected(found); setDrawerMode('view'); setDrawerOpen(true) }
+      else { pendingOpenQuotationId.current = id }
     }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 

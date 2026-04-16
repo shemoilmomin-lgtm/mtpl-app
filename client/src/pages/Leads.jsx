@@ -212,6 +212,44 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
   const [pendingFile, setPendingFile] = useState(null)
   const fileInputRef = useRef(null)
 
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
+
+  function canDeleteComment(comment) {
+    if (isAdmin) return true
+    if (comment.user_id !== currentUser?.id) return false
+    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 30 * 60 * 1000
+  }
+
+  function canEditComment(comment) {
+    if (isAdmin) return true
+    if (comment.user_id !== currentUser?.id) return false
+    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 2 * 60 * 60 * 1000
+  }
+
+  async function deleteComment(id) {
+    try {
+      await fetch(`${API}/comments/delete/${id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setComments(prev => prev.filter(c => c.id !== id))
+    } catch {}
+  }
+
+  async function editComment(id, newMessage) {
+    try {
+      const res = await fetch(`${API}/comments/edit/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ message: newMessage }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setComments(prev => prev.map(c => c.id === id ? { ...c, message: updated.message, edited_at: updated.edited_at } : c))
+      }
+    } catch {}
+  }
+
   async function load() {
     try {
       const data = await fetch(`${API}/comments/lead/${lead.id}`, {
@@ -280,6 +318,19 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
   function CommentCard({ comment, isReply }) {
     const author = userMap[comment.user_id]
     const { text, attachments } = parseMessage(comment.message)
+    const canDelete = canDeleteComment(comment)
+    const canEdit = canEditComment(comment)
+    const [editing, setEditing] = useState(false)
+    const [editText, setEditText] = useState(text)
+
+    async function saveEdit() {
+      if (!editText.trim()) return
+      const attachmentPart = comment.message.match(/(\[attachment:[^\]]+\])/g)?.join(' ') || ''
+      const newMessage = editText.trim() + (attachmentPart ? '\n' + attachmentPart : '')
+      await editComment(comment.id, newMessage)
+      setEditing(false)
+    }
+
     return (
       <div className={cn('rounded-xl border border-border p-3.5 flex flex-col gap-2', isReply && 'bg-muted/20')}>
         <div className="flex items-center justify-between gap-2">
@@ -287,20 +338,55 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
             <UserAvatar name={author?.name} />
             <span className="text-xs font-semibold text-foreground">{author?.name || 'Unknown'}</span>
             <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
+            {comment.edited_at && <span className="text-[10px] text-muted-foreground/60">(edited)</span>}
           </div>
-          {!isReply && (
-            <button type="button"
-              onClick={() => setReplyTo(replyTo?.id === comment.id ? null : comment)}
-              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
-              <Reply size={11} />
-              Reply
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {!isReply && (
+              <button type="button"
+                onClick={() => setReplyTo(replyTo?.id === comment.id ? null : comment)}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+                <Reply size={11} />
+                Reply
+              </button>
+            )}
+            {canEdit && !editing && (
+              <button type="button"
+                onClick={() => { setEditText(text); setEditing(true) }}
+                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ml-0.5">
+                <Pencil size={11} />
+              </button>
+            )}
+            {canDelete && (
+              <button type="button"
+                onClick={() => deleteComment(comment.id)}
+                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-0.5">
+                <Trash2 size={11} />
+              </button>
+            )}
+          </div>
         </div>
-        {text && <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>}
-        {attachments.map((a, i) => (
-          <AttachmentChip key={i} fileName={a.fileName} displayName={a.displayName} token={token} />
-        ))}
+        {editing ? (
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={editText}
+              onChange={e => setEditText(e.target.value)}
+              className="w-full bg-input/50 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30 resize-none"
+              rows={3}
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setEditing(false)} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-muted">Cancel</button>
+              <button type="button" onClick={saveEdit} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90">Save</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {text && <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>}
+            {attachments.map((a, i) => (
+              <AttachmentChip key={i} fileName={a.fileName} displayName={a.displayName} token={token} />
+            ))}
+          </>
+        )}
       </div>
     )
   }
@@ -1024,8 +1110,10 @@ function Leads({ tab = 'all' }) {
       navigate(location.pathname, { replace: true, state: {} })
     }
     if (location.state?.openLeadId) {
-      pendingOpenLeadId.current = location.state.openLeadId
+      const id = location.state.openLeadId
       navigate(location.pathname, { replace: true, state: {} })
+      const found = leads.find(l => l.id === id)
+      if (found) { openView(found) } else { pendingOpenLeadId.current = id }
     }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 

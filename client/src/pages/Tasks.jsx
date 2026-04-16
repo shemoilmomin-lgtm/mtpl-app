@@ -1413,8 +1413,10 @@ function Tasks({ tab = 'all' }) {
       navigate(location.pathname, { replace: true, state: {} })
     }
     if (location.state?.openTaskId) {
-      pendingOpenTaskId.current = location.state.openTaskId
+      const id = location.state.openTaskId
       navigate(location.pathname, { replace: true, state: {} })
+      const found = tasks.find(t => t.id === id)
+      if (found) { openView(found) } else { pendingOpenTaskId.current = id }
     }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 

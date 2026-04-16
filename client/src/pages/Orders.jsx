@@ -1849,8 +1849,10 @@ function Orders({ tab = 'active' }) {
       navigate(location.pathname, { replace: true, state: {} })
     }
     if (location.state?.openOrderId) {
-      pendingOpenOrderId.current = location.state.openOrderId
+      const id = location.state.openOrderId
       navigate(location.pathname, { replace: true, state: {} })
+      const found = orders.find(o => o.id === id)
+      if (found) { openView(found) } else { pendingOpenOrderId.current = id }
     }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
