@@ -41,6 +41,14 @@ function formatDate(str) {
   return new Date(str).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function fmtQuotationNumber(quotation) {
+  const qid = quotation.quotation_id
+  if (qid && (qid.startsWith('MTPLQ-') || qid.startsWith('QT-'))) return qid
+  const id = Number(quotation.id)
+  if (id <= 41) return `QT-${String(id).padStart(4, '0')}`
+  return `MTPLQ-${String(id).padStart(4, '0')}`
+}
+
 function formatAmount(val) {
   const n = parseFloat(val)
   if (isNaN(n)) return '—'
@@ -723,9 +731,9 @@ function QuotationView({ quotation, clientMap, userMap, onEdit, onClose, onDupli
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/60 bg-muted/20">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
             <span className="font-mono text-[11px] bg-muted text-muted-foreground px-2 py-0.5 rounded-md shrink-0">
-              QT-{String(quotation.id).padStart(3, '0')}
+              {fmtQuotationNumber(quotation)}
             </span>
-            <CopyButton value={`QT-${String(quotation.id).padStart(3, '0')}`} title="Copy Quotation Number" />
+            <CopyButton value={fmtQuotationNumber(quotation)} title="Copy Quotation Number" />
             <span className="text-muted-foreground/30 text-xs shrink-0">·</span>
             <span className="text-xs text-muted-foreground shrink-0">{formatDate(quotation.date)}</span>
             {createdBy && (
