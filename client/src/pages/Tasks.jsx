@@ -370,6 +370,7 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   }
 
   async function load() {
+    if (task.id < 0) { setLoading(false); return }
     try {
       const data = await fetch(`${API}/comments/task/${task.id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -382,7 +383,7 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   useEffect(() => { load() }, [task.id])
 
   useEffect(() => {
-    if (!token) return
+    if (!token || task.id < 0) return
     const es = new EventSource(`${API}/comments/stream?token=${encodeURIComponent(token)}`)
     es.addEventListener('entity_comment', (e) => {
       try {
@@ -423,7 +424,11 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
           parent_id: replyTo?.id ?? null,
         }),
       })
-      if (res.ok) { setMessage(''); setPendingFile(null); setReplyTo(null); load() }
+      if (res.ok) {
+        const saved = await res.json()
+        setComments(prev => prev.some(x => x.id === saved.id) ? prev : [saved, ...prev])
+        setMessage(''); setPendingFile(null); setReplyTo(null)
+      }
     } catch {}
     setSending(false)
   }

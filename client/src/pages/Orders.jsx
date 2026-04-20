@@ -148,7 +148,7 @@ function StatusSelectHeader({ order, onStatusChange }) {
           <ChevronDown size={10} className="opacity-60" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="max-h-80 [&::before]:hidden backdrop-blur-sm bg-popover/65">
+      <DropdownMenuContent align="start" className="max-h-80 overflow-y-auto [&::before]:hidden backdrop-blur-sm bg-popover/65" onWheel={e => e.stopPropagation()}>
         {STATUSES.map(s => (
           <DropdownMenuItem key={s} onClick={() => onStatusChange(order, s)}>
             <span className={cn('size-2 rounded-full shrink-0', STATUS_DOT_COLORS[s])} />
@@ -183,7 +183,7 @@ function StatusSelect({ order, onStatusChange }) {
           </span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" onClick={e => e.stopPropagation()} className="max-h-80 [&::before]:hidden backdrop-blur-sm bg-popover/65">
+      <DropdownMenuContent align="start" onClick={e => e.stopPropagation()} className="max-h-80 overflow-y-auto [&::before]:hidden backdrop-blur-sm bg-popover/65" onWheel={e => e.stopPropagation()}>
         {STATUSES.map(s => (
           <DropdownMenuItem key={s} onClick={() => onStatusChange(order, s)}>
             <span className={cn('size-2 rounded-full shrink-0', STATUS_DOT_COLORS[s])} />

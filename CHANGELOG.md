@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.2.1 — 2026-04-20
+- Tasks: fix integer overflow error when opening a newly created task's comments tab
+- Tasks: fix comment appearing multiple times after a single submit
+- Orders: fix status dropdown not scrollable inside edit panel
+
 ## v3.1.8 — 2026-04-15
 - Tasks: Create Task form now auto-assigns the logged-in user by default
 
