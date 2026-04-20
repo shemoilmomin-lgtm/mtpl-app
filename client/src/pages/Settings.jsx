@@ -460,7 +460,7 @@ function AppUpdateSection() {
     <div className="lg:hidden pt-3 border-t border-border flex flex-col gap-3">
       <div>
         <p className="text-sm font-medium text-foreground">App Version</p>
-        <p className="text-xs text-muted-foreground">v3.2</p>
+        <p className="text-xs text-muted-foreground">v3.2.1</p>
       </div>
       <Button className="w-full" variant="outline" onClick={() => window.location.reload()}>
         Refresh
@@ -823,7 +823,7 @@ function Settings() {
       {activeTab === 'feedback' && <FeedbackTab token={token} />}
       {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
 
-      <p className="text-xs text-muted-foreground/50 pt-2">v3.2</p>
+      <p className="text-xs text-muted-foreground/50 pt-2">v3.2.1</p>
     </div>
   )
 }
