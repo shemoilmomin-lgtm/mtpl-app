@@ -37,7 +37,7 @@ router.get("/next-number", authenticate, async (req, res) => {
 router.get("/", authenticate, async (req, res) => {
   try {
     const quotations = await pool.query(
-      "SELECT * FROM quotations WHERE is_deleted = FALSE ORDER BY created_at DESC"
+      "SELECT * FROM quotations WHERE is_deleted = FALSE ORDER BY id DESC"
     );
     const items = await pool.query(
       "SELECT * FROM quotation_items ORDER BY quotation_id, sort_order ASC"

@@ -40,7 +40,7 @@ const JOB_TYPES = [
 
 const STATUSES = [
   'negotiation', 'quotation', 'proforma', 'designing', 'review',
-  'corrections', 'pre-press', 'printing', 'tax invoice', 'invoice pending',
+  'corrections', 'work in progress', 'pre-press', 'printing', 'tax invoice', 'invoice pending',
   'ready at office', 'out for delivery', 'waiting pickup', 'completed', 'long pending',
 ]
 
@@ -51,6 +51,7 @@ const STATUS_COLORS = {
   'designing':       'bg-purple-500/10 text-purple-500 dark:text-purple-400',
   'review':          'bg-amber-500/10 text-amber-600 dark:text-amber-400',
   'corrections':     'bg-orange-500/10 text-orange-500 dark:text-orange-400',
+  'work in progress':'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
   'pre-press':       'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
   'printing':        'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
   'tax invoice':     'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
@@ -69,6 +70,7 @@ const STATUS_DOT_COLORS = {
   'designing':       'bg-purple-400',
   'review':          'bg-amber-400',
   'corrections':     'bg-orange-400',
+  'work in progress':'bg-indigo-400',
   'pre-press':       'bg-cyan-400',
   'printing':        'bg-cyan-400',
   'tax invoice':     'bg-emerald-400',
@@ -384,9 +386,7 @@ function ClientCombobox({ clients, value, onChange }) {
 
 function quotationLabel(q) {
   if (!q) return ''
-  return q.id <= 41
-    ? `QT-${String(q.id).padStart(4, '0')}`
-    : `MTPLQ-${String(q.id).padStart(4, '0')}`
+  return q.quotation_id || `MTPLQ-${String(q.id).padStart(4, '0')}`
 }
 
 // ─── Quotation combobox ───────────────────────────────────────────────────────
@@ -673,10 +673,12 @@ function DetailsTab({ order, client, preparedByUser, quotationAmount, quotationR
               token={token}
               canEdit={isAdmin}
             />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Delivery</span>
-              <span className="text-sm text-foreground">{formatDate(order.delivery_expected)}</span>
-            </div>
+            <InlineDeliveryField
+              initialValue={order.delivery_expected}
+              orderId={order.id}
+              token={token}
+              canEdit={isAdmin}
+            />
           </div>
 
           {(order.assignees?.length > 0) && (
@@ -1143,7 +1145,62 @@ function InlineInvoiceField({ label, field, initialValue, orderId, token, canEdi
           {canEdit && (
             <button
               onClick={() => setEditing(true)}
-              className="opacity-0 group-hover:opacity-100 flex items-center justify-center size-5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              className="flex items-center justify-center size-5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            >
+              <Pencil size={11} />
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function InlineDeliveryField({ initialValue, orderId, token, canEdit }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(initialValue ? initialValue.slice(0, 10) : '')
+  const [saving, setSaving] = useState(false)
+
+  async function save() {
+    setSaving(true)
+    try {
+      await fetch(`/api/orders/${orderId}/invoice`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ field: 'delivery_expected', value }),
+      })
+    } catch {}
+    setSaving(false)
+    setEditing(false)
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Delivery</span>
+      {editing ? (
+        <div className="flex items-center gap-1.5">
+          <input
+            autoFocus
+            type="date"
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
+            className="text-sm bg-input/50 border border-border rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-ring/30"
+          />
+          <button onClick={save} disabled={saving} className="flex items-center justify-center size-6 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+            {saving ? <span className="text-[10px]">…</span> : <Check size={12} />}
+          </button>
+          <button onClick={() => setEditing(false)} className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <X size={12} />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm text-foreground">{value ? formatDate(value) : '—'}</span>
+          {canEdit && (
+            <button
+              onClick={() => setEditing(true)}
+              className="flex items-center justify-center size-5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
             >
               <Pencil size={11} />
             </button>

@@ -23,7 +23,7 @@ import {
 import {
   Plus, Search, MoreHorizontal, Copy, Check, X, Pencil, Trash2, Minus, Archive,
   AlignLeft, MessageSquare, Activity, Paperclip, CornerDownRight, Download,
-  ChevronsUpDown, ChevronLeft, ChevronRight,
+  ChevronsUpDown, ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
@@ -42,11 +42,7 @@ function formatDate(str) {
 }
 
 function fmtQuotationNumber(quotation) {
-  const qid = quotation.quotation_id
-  if (qid && (qid.startsWith('MTPLQ-') || qid.startsWith('QT-'))) return qid
-  const id = Number(quotation.id)
-  if (id <= 41) return `QT-${String(id).padStart(4, '0')}`
-  return `MTPLQ-${String(id).padStart(4, '0')}`
+  return quotation.quotation_id || `MTPLQ-${String(quotation.id).padStart(4, '0')}`
 }
 
 function formatAmount(val) {
@@ -1359,7 +1355,7 @@ function Quotations() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState(20)
+  const [perPage, setPerPage] = useState(20) // null = show all
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerMode, setDrawerMode] = useState('view')
@@ -1401,13 +1397,13 @@ function Quotations() {
         clientMap[qt.client_id]?.full_name?.toLowerCase().includes(q)
       )
     }
-    return [...list].sort((a, b) => (b.quotation_id || '').localeCompare(a.quotation_id || ''))
+    return [...list].sort((a, b) => b.id - a.id)
   }, [quotations, search, clientMap])
 
   useEffect(() => { setPage(1) }, [filtered])
 
   const paginated = useMemo(
-    () => filtered.slice((page - 1) * perPage, page * perPage),
+    () => perPage === null ? filtered : filtered.slice((page - 1) * perPage, page * perPage),
     [filtered, page, perPage]
   )
 
@@ -1482,7 +1478,7 @@ function Quotations() {
         </div>
         {filtered.length > 0 && (
           <div className="flex items-center gap-2 shrink-0">
-            {filtered.length > perPage && (
+            {perPage !== null && filtered.length > perPage && (
               <>
                 <button
                   onClick={() => setPage(p => p - 1)} disabled={page === 1}
@@ -1499,16 +1495,26 @@ function Quotations() {
                 </button>
               </>
             )}
-            <Select value={String(perPage)} onValueChange={v => { setPerPage(Number(v)); setPage(1) }}>
-              <SelectTrigger className="h-8 w-24 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="20">Show 20</SelectItem>
-                <SelectItem value="50">Show 50</SelectItem>
-                <SelectItem value="100">Show 100</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-xs text-foreground hover:bg-muted transition-colors whitespace-nowrap">
+                  {perPage === null ? 'Show All' : `Show ${perPage}`}
+                  <ChevronDown size={12} className="text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="backdrop-blur-sm bg-popover/65">
+                {[20, 50, 100].map(n => (
+                  <DropdownMenuItem key={n} onClick={() => { setPerPage(n); setPage(1) }}
+                    className={cn('text-xs whitespace-nowrap', perPage === n && 'font-medium text-foreground')}>
+                    Show {n}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuItem onClick={() => { setPerPage(null); setPage(1) }}
+                  className={cn('text-xs whitespace-nowrap', perPage === null && 'font-medium text-foreground')}>
+                  Show All
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
@@ -1534,7 +1540,7 @@ function Quotations() {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground font-mono mt-1.5">
-                    QT-{String(qt.id).padStart(3, '0')}
+                    {fmtQuotationNumber(qt)}
                     {qt.date && <span className="font-sans"> &bull; {formatDate(qt.date)}</span>}
                   </p>
                 </div>
@@ -1603,8 +1609,8 @@ function Quotations() {
                     onClick={() => { setSelected(qt); setDrawerMode('view'); setDrawerOpen(true) }}>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-xs text-muted-foreground">QT-{String(qt.id).padStart(3, '0')}</span>
-                        <CopyButton value={`QT-${String(qt.id).padStart(3, '0')}`} title="Copy Quotation Number" />
+                        <span className="font-mono text-xs text-muted-foreground">{fmtQuotationNumber(qt)}</span>
+                        <CopyButton value={fmtQuotationNumber(qt)} title="Copy Quotation Number" />
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{formatDate(qt.date)}</TableCell>

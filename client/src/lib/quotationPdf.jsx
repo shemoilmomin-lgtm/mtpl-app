@@ -59,16 +59,8 @@ function fmtDate(str) {
   return [String(d.getDate()).padStart(2, '0'), String(d.getMonth() + 1).padStart(2, '0'), d.getFullYear()].join('/')
 }
 
-// Returns the human-readable quotation number.
-// New records have quotation_id already set to MTPLQ-xxxx or QT-xxxx.
-// Legacy records (id <= 41) had QT-xxxx; those created before the MTPLQ
-// convention may still carry the old q_<timestamp> value in the DB.
 function fmtQuotationNumber(quotation) {
-  const qid = quotation.quotation_id
-  if (qid && (qid.startsWith('MTPLQ-') || qid.startsWith('QT-'))) return qid
-  const id = Number(quotation.id)
-  if (id <= 41) return `QT-${String(id).padStart(4, '0')}`
-  return `MTPLQ-${String(id).padStart(4, '0')}`
+  return quotation.quotation_id || `MTPLQ-${String(quotation.id).padStart(4, '0')}`
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────

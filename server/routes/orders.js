@@ -55,7 +55,7 @@ router.patch("/:id/invoice", authenticate, async (req, res) => {
     return res.status(403).json({ error: "Forbidden" });
   }
   const { field, value } = req.body;
-  if (!["proforma_invoice_number", "invoice_number"].includes(field)) {
+  if (!["proforma_invoice_number", "invoice_number", "delivery_expected"].includes(field)) {
     return res.status(400).json({ error: "Invalid field" });
   }
   try {
@@ -69,7 +69,7 @@ router.patch("/:id/invoice", authenticate, async (req, res) => {
       action: "edited",
       entityType: "order",
       entityId: Number(req.params.id),
-      message: `Updated ${field === "invoice_number" ? "Tax Invoice No." : "Proforma No."} to: ${value || "(cleared)"}`,
+      message: `Updated ${field === "invoice_number" ? "Tax Invoice No." : field === "delivery_expected" ? "Delivery Date" : "Proforma No."} to: ${value || "(cleared)"}`,
     });
     res.json(result.rows[0]);
   } catch (err) {
