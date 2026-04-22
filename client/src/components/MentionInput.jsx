@@ -98,7 +98,7 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
   }
 
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1 overflow-hidden rounded-3xl border border-border focus-within:border-foreground/30 transition-colors">
       <textarea
         ref={inputRef}
         value={value}
@@ -106,8 +106,9 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         rows={1}
-        className={className}
-        style={{ resize: 'none', overflow: 'hidden' }}
+        className={className + ' [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/20'}
+        style={{ resize: 'none', overflow: 'hidden', maxHeight: '160px' }}
+        onInput={e => { e.target.style.overflow = e.target.scrollHeight > 160 ? 'auto' : 'hidden' }}
       />
       {query !== null && filtered.length > 0 && (
         <div className="absolute bottom-full mb-1.5 left-0 w-48 bg-popover border border-border rounded-xl shadow-lg overflow-hidden z-50">

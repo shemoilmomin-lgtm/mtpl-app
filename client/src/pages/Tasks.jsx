@@ -568,7 +568,7 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendComment() } }}
             placeholder={replyTo ? 'Write a reply…' : 'Write a comment…'}
             users={Object.values(userMap)}
-            className="w-full bg-input/50 rounded-3xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30 placeholder:text-muted-foreground"
+            className="w-full bg-white dark:bg-zinc-900 px-4 py-2 text-sm outline-none placeholder:text-muted-foreground appearance-none"
           />
           <Button size="sm" onClick={sendComment} disabled={sending || (!message.trim() && !pendingFile)}>
             {sending ? '…' : 'Send'}
