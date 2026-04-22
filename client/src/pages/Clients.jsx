@@ -19,7 +19,7 @@ import {
 import {
   Plus, Search, MoreHorizontal, Copy, Check, X, Pencil, Archive, Trash2,
   Phone, Mail, MapPin, AlignLeft, MessageSquare, Activity,
-  Paperclip, Reply, CornerDownRight, Building2, ChevronLeft, ChevronRight,
+  Paperclip, Reply, CornerDownRight, Building2, ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
@@ -965,16 +965,22 @@ function Clients() {
                 </button>
               </>
             )}
-            <Select value={String(perPage)} onValueChange={v => { setPerPage(Number(v)); setPage(1) }}>
-              <SelectTrigger className="h-8 w-24 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="20">Show 20</SelectItem>
-                <SelectItem value="50">Show 50</SelectItem>
-                <SelectItem value="100">Show 100</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-xs text-foreground hover:bg-muted transition-colors whitespace-nowrap">
+                  Show {perPage}
+                  <ChevronDown size={12} className="text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="backdrop-blur-sm bg-popover/65">
+                {[20, 50, 100].map(n => (
+                  <DropdownMenuItem key={n} onClick={() => { setPerPage(n); setPage(1) }}
+                    className={cn('text-xs whitespace-nowrap', perPage === n && 'font-medium text-foreground')}>
+                    Show {n}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
