@@ -1567,7 +1567,7 @@ function OrderForm({ order, clients, users, quotations, token, currentUser, onSa
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-60">
                 {JOB_TYPES.map(jt => <SelectItem key={jt} value={jt}>{jt}</SelectItem>)}
               </SelectContent>
             </Select>
