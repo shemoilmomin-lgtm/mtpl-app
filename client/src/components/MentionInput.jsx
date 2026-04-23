@@ -98,7 +98,7 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
   }
 
   return (
-    <div className="relative flex-1 overflow-hidden rounded-3xl border border-border focus-within:border-foreground/30 transition-colors">
+    <div className="relative flex-1 rounded-3xl border border-border focus-within:border-foreground/30 transition-colors">
       <textarea
         ref={inputRef}
         value={value}

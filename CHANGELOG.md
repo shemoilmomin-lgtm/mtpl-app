@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.2.4 — 2026-04-23
+- Comments: fix @mention user dropdown not appearing (overflow-hidden was clipping the popup)
+
+## v3.2.3 — 2026-04-22
+- Comments: textarea auto-scroll, white background, clean border styling
+- UI: replace page size selects with styled dropdowns across all modules
+
+## v3.2.2 — 2026-04-22
+- Orders: UI improvements, quotation number cleanup, new order status
+
 ## v3.2.1 — 2026-04-20
 - Tasks: fix integer overflow error when opening a newly created task's comments tab
 - Tasks: fix comment appearing multiple times after a single submit
