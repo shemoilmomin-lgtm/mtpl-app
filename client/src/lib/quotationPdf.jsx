@@ -1,8 +1,28 @@
 import React from 'react'
 import {
-  Document, Page, View, Text, StyleSheet, pdf, Image,
+  Document, Page, View, Text, StyleSheet, pdf, Image, Font,
 } from '@react-pdf/renderer'
 import logoUrl from '../assets/logo.png'
+import MontserratRegular from '../assets/fonts/Montserrat-Regular.ttf'
+import MontserratMedium from '../assets/fonts/Montserrat-Medium.ttf'
+import MontserratSemiBold from '../assets/fonts/Montserrat-SemiBold.ttf'
+import MontserratBold from '../assets/fonts/Montserrat-Bold.ttf'
+import MontserratItalic from '../assets/fonts/Montserrat-Italic.ttf'
+import MontserratSemiBoldItalic from '../assets/fonts/Montserrat-SemiBoldItalic.ttf'
+import MontserratBoldItalic from '../assets/fonts/Montserrat-BoldItalic.ttf'
+
+Font.register({
+  family: 'Montserrat',
+  fonts: [
+    { src: MontserratRegular, fontWeight: 'normal', fontStyle: 'normal' },
+    { src: MontserratMedium, fontWeight: 500, fontStyle: 'normal' },
+    { src: MontserratSemiBold, fontWeight: 600, fontStyle: 'normal' },
+    { src: MontserratBold, fontWeight: 'bold', fontStyle: 'normal' },
+    { src: MontserratItalic, fontWeight: 'normal', fontStyle: 'italic' },
+    { src: MontserratSemiBoldItalic, fontWeight: 600, fontStyle: 'italic' },
+    { src: MontserratBoldItalic, fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+})
 
 // ─── Company constants ────────────────────────────────────────────────────────
 
@@ -72,7 +92,7 @@ const BORDER_COLOR = '#bbbbbb'
 
 const s = StyleSheet.create({
   page: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Montserrat',
     fontSize: 9,
     color: '#222222',
     paddingHorizontal: 28,
@@ -97,7 +117,7 @@ const s = StyleSheet.create({
   },
   metaLine: { flexDirection: 'row', marginBottom: 0 },
   metaLabel: { color: MUTED, width: 110 },
-  metaValue: { fontFamily: 'Helvetica-Bold', flex: 1 },
+  metaValue: { fontFamily: 'Montserrat', fontWeight: 'bold', flex: 1 },
   metaSpacer: { height: 6 },
 
   // Address
@@ -106,17 +126,17 @@ const s = StyleSheet.create({
     padding: 8,
   },
   addrHead: {
-    fontFamily: 'Helvetica-Bold', fontSize: 9,
+    fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 9,
     borderBottomWidth: 0.5, borderColor: '#dddddd',
     paddingBottom: 4, marginBottom: 5,
   },
-  addrName: { fontFamily: 'Helvetica-Bold', fontSize: 10, color: BLUE, marginBottom: 3 },
+  addrName: { fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 10, color: BLUE, marginBottom: 3 },
   addrText: { fontSize: 8.5, color: '#333333', lineHeight: 1.65 },
 
   // Items table
   itemsWrap: { marginTop: 8, borderWidth: 1, borderColor: BORDER_COLOR },
   tHead: { flexDirection: 'row', backgroundColor: BG, borderBottomWidth: 1, borderColor: BORDER_COLOR },
-  th: { fontSize: 8, fontFamily: 'Helvetica-Bold', padding: 6 },
+  th: { fontSize: 8, fontFamily: 'Montserrat', fontWeight: 'bold', padding: 6 },
   tRow: { flexDirection: 'row', borderTopWidth: 1, borderColor: BORDER_COLOR },
   td: { fontSize: 9, padding: 7 },
   cellDiv: { borderRightWidth: 1, borderColor: BORDER_COLOR },
@@ -130,13 +150,13 @@ const s = StyleSheet.create({
   footRight: { width: 210, borderLeftWidth: 1, borderColor: BORDER_COLOR },
 
   wordsLabel: { fontSize: 8, color: MUTED, marginBottom: 2 },
-  wordsText: { fontSize: 9, fontFamily: 'Helvetica-BoldOblique', lineHeight: 1.5 },
+  wordsText: { fontSize: 9, fontFamily: 'Montserrat', fontWeight: 600, fontStyle: 'italic', lineHeight: 1.5 },
 
   bankWrap: { marginTop: 9 },
-  bankCo: { fontFamily: 'Helvetica-Bold', fontSize: 8.5, marginBottom: 1 },
+  bankCo: { fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 8.5, marginBottom: 1 },
   bankLine: { fontSize: 8, color: '#333333' },
 
-  termsHead: { fontFamily: 'Helvetica-Bold', fontSize: 8.5, marginTop: 10, marginBottom: 3 },
+  termsHead: { fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 8.5, marginTop: 10, marginBottom: 3 },
   termsLine: { fontSize: 7.5, color: '#333333', lineHeight: 1.65 },
 
   totalRow: {
@@ -151,7 +171,7 @@ const s = StyleSheet.create({
     paddingVertical: 7, paddingHorizontal: 10,
   },
   totalLabel: { flex: 1, color: MUTED },
-  totalValue: { fontFamily: 'Helvetica-Bold', textAlign: 'right' },
+  totalValue: { fontFamily: 'Montserrat', fontWeight: 'bold', textAlign: 'right' },
 
   sigBox: {
     borderTopWidth: 1, borderColor: BORDER_COLOR,
@@ -243,7 +263,7 @@ function QuotationDocument({ quotation, client, createdByUser }) {
                 <Text style={[s.td, s.cellDiv, { width: cNum, textAlign: 'center' }]}>{i + 1}</Text>
                 <View style={[s.cellDiv, { flex: 1, padding: 7 }]}>
                   {item.item_name
-                    ? <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 9 }}>{item.item_name}</Text>
+                    ? <Text style={{ fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 9 }}>{item.item_name}</Text>
                     : null}
                   {item.description
                     ? <Text style={{ fontSize: 7.5, color: MUTED, marginTop: 2 }}>{item.description}</Text>
@@ -251,14 +271,14 @@ function QuotationDocument({ quotation, client, createdByUser }) {
                 </View>
                 <Text style={[s.td, s.cellDiv, { width: cQty, textAlign: 'right' }]}>{fmt(item.quantity)}</Text>
                 <Text style={[s.td, s.cellDiv, { width: cRate, textAlign: 'right' }]}>{fmt(item.rate)}</Text>
-                <Text style={[s.td, { width: cAmt, textAlign: 'right', fontFamily: 'Helvetica-Bold' }]}>{fmt(amt)}</Text>
+                <Text style={[s.td, { width: cAmt, textAlign: 'right', fontFamily: 'Montserrat', fontWeight: 'bold' }]}>{fmt(amt)}</Text>
               </View>
             )
           })}
         </View>
 
         {/* ── Footer ── */}
-        <View style={s.footerWrap}>
+        <View style={s.footerWrap} wrap={false}>
 
           {/* Left: words + bank + terms */}
           <View style={s.footLeft}>
@@ -302,7 +322,7 @@ function QuotationDocument({ quotation, client, createdByUser }) {
                   </View>
                 )}
                 <View style={s.totalRowFinal}>
-                  <Text style={[s.totalLabel, { fontFamily: 'Helvetica-Bold', fontSize: 10, color: '#222222' }]}>Total</Text>
+                  <Text style={[s.totalLabel, { fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 10, color: '#222222' }]}>Total</Text>
                   <Text style={[s.totalValue, { fontSize: 10 }]}>{'₹'}{fmt(total)}</Text>
                 </View>
               </>

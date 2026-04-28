@@ -330,6 +330,7 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   const [replyTo, setReplyTo] = useState(null)
   const [pendingFile, setPendingFile] = useState(null)
   const fileInputRef = useRef(null)
+  const sendingRef = useRef(false)
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
 
@@ -397,7 +398,9 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
   }, [token, task.id])
 
   async function sendComment() {
+    if (sendingRef.current) return
     if (!message.trim() && !pendingFile) return
+    sendingRef.current = true
     setSending(true)
     try {
       let attachmentRef = ''
@@ -430,6 +433,7 @@ function TaskCommentsTab({ task, userMap, token, currentUser }) {
         setMessage(''); setPendingFile(null); setReplyTo(null)
       }
     } catch {}
+    sendingRef.current = false
     setSending(false)
   }
 
