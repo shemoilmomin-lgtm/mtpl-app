@@ -1291,13 +1291,8 @@ function QuotationForm({ quotation, clients, users, leads = [], orders = [], tok
           </button>
         </label>
 
-        {/* ── Notes & Terms ── */}
+        {/* ── Terms ── */}
         <SectionLabel label="Notes & Terms" />
-
-        <Field label="Notes">
-          <Textarea value={form.notes} onChange={e => set('notes', e.target.value)}
-            placeholder="Internal notes…" rows={3} className="resize-none" />
-        </Field>
 
         <Field label="Terms & Conditions">
           <Textarea value={form.terms_and_conditions} onChange={e => set('terms_and_conditions', e.target.value)}
