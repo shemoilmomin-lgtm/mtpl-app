@@ -768,7 +768,8 @@ function LeadForm({ lead, clients, users, token, currentUser, onSave, onClose })
         client_id: lead.client_id ? String(lead.client_id) : '',
         client_manual_name: lead.client_manual_name ?? '',
         client_manual_contact: lead.client_manual_contact ?? '',
-        job_type: lead.job_type ?? '',
+        job_type: lead.job_type?.startsWith('Other - ') ? 'Other' : (lead.job_type ?? ''),
+        job_type_other: lead.job_type?.startsWith('Other - ') ? lead.job_type.slice(8) : '',
         quantity: lead.quantity ?? '',
         specifications: lead.specifications ?? '',
         delivery_expected: lead.delivery_expected ? lead.delivery_expected.slice(0, 10) : '',
@@ -781,6 +782,7 @@ function LeadForm({ lead, clients, users, token, currentUser, onSave, onClose })
       client_manual_name: '',
       client_manual_contact: '',
       job_type: '',
+      job_type_other: '',
       quantity: '',
       specifications: '',
       delivery_expected: '',
@@ -822,7 +824,9 @@ function LeadForm({ lead, clients, users, token, currentUser, onSave, onClose })
         client_id: form.client_mode === 'select' && form.client_id ? Number(form.client_id) : null,
         client_manual_name: form.client_mode === 'manual' ? form.client_manual_name : null,
         client_manual_contact: form.client_mode === 'manual' ? form.client_manual_contact : null,
-        job_type: form.job_type || null,
+        job_type: form.job_type === 'Other'
+          ? (form.job_type_other.trim() ? `Other - ${form.job_type_other.trim()}` : 'Other')
+          : (form.job_type || null),
         quantity: form.quantity || null,
         specifications: form.specifications || null,
         delivery_expected: form.delivery_expected || null,
@@ -917,13 +921,24 @@ function LeadForm({ lead, clients, users, token, currentUser, onSave, onClose })
         <Field label="Job Type">
           <Select value={form.job_type} onValueChange={v => set('job_type', v)}>
             <SelectTrigger className="w-full"><SelectValue placeholder="Select job type…" /></SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60">
               {JOB_TYPES.map(jt => (
                 <SelectItem key={jt} value={jt}>{jt}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </Field>
+
+        {form.job_type === 'Other' && (
+          <Field label="Specify Job Type">
+            <Input
+              value={form.job_type_other}
+              onChange={e => set('job_type_other', e.target.value)}
+              placeholder="e.g. ID Card"
+              autoFocus
+            />
+          </Field>
+        )}
 
         <Field label="Quantity">
           <Input
