@@ -61,7 +61,7 @@ function inWords(n) {
 function amountInWords(amount) {
   const rupees = Math.floor(amount)
   const paise  = Math.round((amount - rupees) * 100)
-  let result = 'Indian Rupee ' + (inWords(rupees) || 'Zero')
+  let result = 'Indian Rupees ' + (inWords(rupees) || 'Zero')
   if (paise > 0) result += ' and ' + inWords(paise) + ' Paise'
   return result + ' Only'
 }
@@ -201,7 +201,7 @@ function QuotationDocument({ quotation, client, createdByUser }) {
   const cNum  = 22
   const cQty  = 52
   const cRate = 64
-  const cAmt  = 66
+  const cAmt  = 82
 
   return (
     <Document>
@@ -271,14 +271,14 @@ function QuotationDocument({ quotation, client, createdByUser }) {
                 </View>
                 <Text style={[s.td, s.cellDiv, { width: cQty, textAlign: 'right' }]}>{fmt(item.quantity)}</Text>
                 <Text style={[s.td, s.cellDiv, { width: cRate, textAlign: 'right' }]}>{fmt(item.rate)}</Text>
-                <Text style={[s.td, { width: cAmt, textAlign: 'right', fontFamily: 'Montserrat', fontWeight: 'bold' }]}>{fmt(amt)}</Text>
+                <Text style={[s.td, { width: cAmt, textAlign: 'right', fontFamily: 'Montserrat', fontWeight: 'bold' }]}>{'₹'}{fmt(amt)}</Text>
               </View>
             )
           })}
         </View>
 
         {/* ── Footer ── */}
-        <View style={s.footerWrap} wrap={false}>
+        <View style={s.footerWrap}>
 
           {/* Left: words + bank + terms */}
           <View style={s.footLeft}>
@@ -308,17 +308,17 @@ function QuotationDocument({ quotation, client, createdByUser }) {
           </View>
 
           {/* Right: totals + signature */}
-          <View style={s.footRight}>
+          <View style={s.footRight} wrap={false}>
             {!quotation.hide_totals && (
               <>
                 <View style={s.totalRow}>
                   <Text style={s.totalLabel}>Sub Total</Text>
-                  <Text style={s.totalValue}>{fmt(subtotal)}</Text>
+                  <Text style={s.totalValue}>{'₹'}{fmt(subtotal)}</Text>
                 </View>
                 {discValue > 0 && (
                   <View style={s.totalRow}>
                     <Text style={s.totalLabel}>Discount (-)</Text>
-                    <Text style={s.totalValue}>{fmt(discValue)}</Text>
+                    <Text style={s.totalValue}>{'₹'}{fmt(discValue)}</Text>
                   </View>
                 )}
                 <View style={s.totalRowFinal}>
