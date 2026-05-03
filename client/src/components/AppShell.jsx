@@ -430,15 +430,15 @@ function AppShell({ children }) {
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile top bar */}
-        <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
+        <div className="lg:hidden flex items-center justify-between px-4 pt-4 pb-3 border-b border-border bg-card shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-muted-foreground hover:text-foreground"
           >
             <Menu size={20} />
           </button>
-          <img src="/logo-color.svg" alt="MTPL" className="h-5 dark:hidden" />
-          <img src="/logo-white.svg" alt="MTPL" className="h-5 hidden dark:block" />
+          <img src="/logo-color.svg" alt="MTPL" className="h-8 dark:hidden" />
+          <img src="/logo-white.svg" alt="MTPL" className="h-8 hidden dark:block" />
           <div className="flex items-center gap-2">
             {!isSettingsPage && (
               <DropdownMenu>
