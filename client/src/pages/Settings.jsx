@@ -13,7 +13,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { Pencil, Trash2, UserPlus, Sun, Moon, RefreshCw, Paperclip, X, Send, CheckCircle } from 'lucide-react'
+import { Pencil, Trash2, UserPlus, Sun, Moon, RefreshCw, Paperclip, X, Send, CheckCircle, Camera } from 'lucide-react'
+import { UserAvatar } from '@/components/UserAvatar'
 import { cn } from '@/lib/utils'
 
 const API = '/api'
@@ -258,6 +259,8 @@ function UsersTab({ token, currentUserId }) {
 // ── Preferences Tab ───────────────────────────────────────────────────────────
 
 function PreferencesTab({ token, isSuperadmin }) {
+  const { user, updateUser } = useAuth()
+
   // Theme
   const [theme, setTheme] = useState(() => localStorage.getItem('mtpl_theme') || 'light')
 
@@ -274,8 +277,36 @@ function PreferencesTab({ token, isSuperadmin }) {
   const [savingNum, setSavingNum] = useState(false)
   const [savedNum, setSavedNum] = useState(false)
 
+  // Photo
+  const [photoUrl, setPhotoUrl] = useState(user?.photoUrl || null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const photoInputRef = useRef(null)
+
   const authHeaders = { Authorization: `Bearer ${token}` }
   const jsonHeaders = { ...authHeaders, 'Content-Type': 'application/json' }
+
+  async function handlePhotoChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPhoto(true)
+    try {
+      const form = new FormData()
+      form.append('photo', file)
+      const res = await fetch(`${API}/users/${user.id}/photo`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      })
+      const data = await res.json()
+      if (data.photoUrl) {
+        setPhotoUrl(data.photoUrl)
+        updateUser({ photoUrl: data.photoUrl })
+      }
+    } finally {
+      setUploadingPhoto(false)
+      e.target.value = ''
+    }
+  }
 
   useEffect(() => {
     fetch(`${API}/settings`, { headers: authHeaders })
@@ -338,6 +369,47 @@ function PreferencesTab({ token, isSuperadmin }) {
 
   return (
     <div className="flex flex-col gap-5">
+
+      {/* Profile Photo */}
+      <div className="bg-card rounded-2xl p-5 ring-1 ring-foreground/5 flex flex-col gap-4">
+        <div>
+          <p className="text-sm font-medium text-foreground">Profile Photo</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Your photo is visible to all users across the app</p>
+        </div>
+        <Separator />
+        <div className="flex items-center gap-4">
+          <div className="relative shrink-0">
+            <UserAvatar name={user?.name} photoUrl={photoUrl} size="size-16" textSize="text-lg" />
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="absolute -bottom-1 -right-1 size-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              <Camera size={12} />
+            </button>
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-foreground font-medium">{user?.name}</p>
+            <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="text-xs text-primary hover:underline disabled:opacity-50 text-left mt-0.5"
+            >
+              {uploadingPhoto ? 'Uploading…' : 'Change photo'}
+            </button>
+          </div>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+        </div>
+      </div>
 
       {/* Appearance */}
       <div className="bg-card rounded-2xl p-5 ring-1 ring-foreground/5 flex flex-col gap-4">
@@ -460,7 +532,7 @@ function AppUpdateSection() {
     <div className="lg:hidden pt-3 border-t border-border flex flex-col gap-3">
       <div>
         <p className="text-sm font-medium text-foreground">App Version</p>
-        <p className="text-xs text-muted-foreground">v3.2.3</p>
+        <p className="text-xs text-muted-foreground">v3.3</p>
       </div>
       <Button className="w-full" variant="outline" onClick={() => window.location.reload()}>
         Refresh
@@ -576,9 +648,7 @@ function LiveTab({ token }) {
               )}
             >
               {/* Avatar */}
-              <div className="size-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
-                {u.name?.[0]?.toUpperCase() || '?'}
-              </div>
+              <UserAvatar name={u.name} photoUrl={u.photoUrl} size="size-8" textSize="text-xs" />
 
               {/* Name + role */}
               <div className="flex-1 min-w-0">
@@ -823,7 +893,7 @@ function Settings() {
       {activeTab === 'feedback' && <FeedbackTab token={token} />}
       {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
 
-      <p className="text-xs text-muted-foreground/50 pt-2">v3.2.3</p>
+      <p className="text-xs text-muted-foreground/50 pt-2">v3.3</p>
     </div>
   )
 }

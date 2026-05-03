@@ -22,12 +22,14 @@ import {
 } from '@/components/ui/popover'
 import {
   Plus, Search, MoreHorizontal, Check, X, Pencil, Trash2, Archive,
-  AlignLeft, MessageSquare, ChevronsUpDown,
+  AlignLeft, MessageSquare, ActivitySquare, ChevronsUpDown,
   ChevronLeft, ChevronRight, ChevronDown, CornerDownRight, Paperclip, Reply,
   ArrowRightLeft, ExternalLink,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
+import { CommentsPanel } from '@/components/CommentsPanel'
+import { UserAvatar as SharedUserAvatar } from '@/components/UserAvatar'
 
 const API = '/api'
 
@@ -112,12 +114,9 @@ function SectionLabel({ label }) {
   )
 }
 
-function UserAvatar({ name, size = 6 }) {
-  return (
-    <div className={`size-${size} rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-muted-foreground shrink-0`}>
-      {name?.[0]?.toUpperCase() || '?'}
-    </div>
-  )
+function UserAvatar({ name, photoUrl, size = 6 }) {
+  const sizeClass = `size-${size}`
+  return <SharedUserAvatar name={name} photoUrl={photoUrl} size={sizeClass} textSize="text-[10px]" />
 }
 
 function AttachmentChip({ fileName, displayName }) {
@@ -208,6 +207,7 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
+  const sendingRef = useRef(false)
   const [replyTo, setReplyTo] = useState(null)
   const [pendingFile, setPendingFile] = useState(null)
   const fileInputRef = useRef(null)
@@ -277,7 +277,9 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
   }, [token, lead.id])
 
   async function sendComment() {
+    if (sendingRef.current) return
     if (!message.trim() && !pendingFile) return
+    sendingRef.current = true
     setSending(true)
     try {
       let attachmentRef = ''
@@ -306,6 +308,7 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
       })
       if (res.ok) { setMessage(''); setPendingFile(null); setReplyTo(null); load() }
     } catch {}
+    sendingRef.current = false
     setSending(false)
   }
 
@@ -335,7 +338,7 @@ function LeadActivityTab({ lead, userMap, token, currentUser }) {
       <div className={cn('rounded-xl border border-border p-3.5 flex flex-col gap-2', isReply && 'bg-muted/20')}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <UserAvatar name={author?.name} />
+            <UserAvatar name={author?.name} photoUrl={author?.photoUrl} />
             <span className="text-xs font-semibold text-foreground">{author?.name || 'Unknown'}</span>
             <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
             {comment.edited_at && <span className="text-[10px] text-muted-foreground/60">(edited)</span>}
@@ -473,7 +476,8 @@ function LeadView({ lead, clientMap, orderMap, userMap, currentUser, onEdit, onC
   const isExecutive = currentUser?.role === 'executive'
   const tabs = [
     { key: 'details', label: 'Details', icon: AlignLeft },
-    ...(!isExecutive ? [{ key: 'activity', label: 'Activity', icon: MessageSquare }] : []),
+    { key: 'comments', label: 'Comments', icon: MessageSquare },
+    ...(!isExecutive ? [{ key: 'activity', label: 'Activity', icon: ActivitySquare }] : []),
   ]
 
   async function reloadLead() {
@@ -706,6 +710,16 @@ function LeadView({ lead, clientMap, orderMap, userMap, currentUser, onEdit, onC
               </>
             )}
           </div>
+        )}
+
+        {activeTab === 'comments' && (
+          <CommentsPanel
+            entityType="lead"
+            entityId={localLead.id}
+            token={token}
+            currentUser={currentUser}
+            users={Object.values(userMap)}
+          />
         )}
 
         {activeTab === 'activity' && (

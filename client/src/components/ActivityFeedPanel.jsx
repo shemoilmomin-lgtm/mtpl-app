@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, AtSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { renderWithMentions } from '@/components/MentionInput'
+import { UserAvatar } from '@/components/UserAvatar'
 
 const API = '/api'
 
@@ -135,12 +136,10 @@ export function ActivityFeedPanel({ token, onClose }) {
                   {/* Author + time */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <div className="size-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-muted-foreground shrink-0">
-                        {item.author_name?.[0]?.toUpperCase() || '?'}
-                      </div>
-                      <span className="text-xs font-medium text-foreground">{item.author_name}</span>
+                      <UserAvatar name={item.author_name} photoUrl={item.author_photo_url} size="size-5" textSize="text-[10px]" />
+                      <span className="text-[13px] font-medium text-foreground">{item.author_name}</span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
+                    <span className="text-[11px] text-muted-foreground shrink-0">
                       {formatRelativeTime(item.created_at)}
                     </span>
                   </div>
@@ -149,20 +148,20 @@ export function ActivityFeedPanel({ token, onClose }) {
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {isMention && <AtSign size={9} className="text-primary shrink-0" />}
                     <span className={cn(
-                      'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                      'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
                       ENTITY_COLORS[item.entity_type] || 'bg-muted text-muted-foreground'
                     )}>
                       {ENTITY_LABELS[item.entity_type] || item.entity_type}
                     </span>
                     {item.entity_label && (
-                      <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[130px]">
+                      <span className="text-[11px] text-muted-foreground font-mono truncate max-w-[130px]">
                         {item.entity_label}
                       </span>
                     )}
                   </div>
 
                   {/* Comment text */}
-                  <p className="text-xs text-foreground/80 line-clamp-3 leading-relaxed">
+                  <p className="text-[13px] text-foreground/80 line-clamp-3 leading-relaxed">
                     {renderWithMentions(text, users)}
                   </p>
                 </div>

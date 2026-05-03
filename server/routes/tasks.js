@@ -45,7 +45,7 @@ router.get("/trashed", authenticate, async (req, res) => {
 router.get("/", authenticate, async (req, res) => {
   try {
     const tasks = await pool.query(
-      "SELECT * FROM tasks WHERE is_deleted = FALSE ORDER BY sort_order ASC, created_at DESC"
+      "SELECT * FROM tasks WHERE is_deleted = FALSE AND is_archived = FALSE ORDER BY sort_order ASC, created_at DESC"
     );
     const assignees = await pool.query(
       `SELECT ta.task_id, u.id, u.name FROM task_assignees ta

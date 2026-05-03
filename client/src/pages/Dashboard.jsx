@@ -64,24 +64,31 @@ function ChartTooltip({ active, payload, label }) {
 // ─── Orders Chart ─────────────────────────────────────────────────────────────
 function OrdersChart({ orders }) {
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const year = new Date().getFullYear()
+  const now = new Date()
 
-  const data = MONTHS.map((month, i) => ({
-    month,
+  // Build 13 month slots: 12 past months + current month
+  const slots = Array.from({ length: 13 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 12 + i, 1)
+    return { year: d.getFullYear(), month: d.getMonth(), label: MONTHS[d.getMonth()] }
+  })
+
+  const data = slots.map(({ year, month, label }) => ({
+    month: label,
     orders: orders.filter(o => {
       const d = new Date(o.date)
-      return d.getFullYear() === year && d.getMonth() === i
+      return d.getFullYear() === year && d.getMonth() === month
     }).length,
   }))
 
   const total = data.reduce((s, d) => s + d.orders, 0)
+  const rangeLabel = `${slots[0].label} ${slots[0].year} – ${slots[12].label} ${slots[12].year}`
 
   return (
     <div className="bg-card rounded-2xl p-5 ring-1 ring-foreground/5 flex flex-col gap-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-semibold text-foreground">Orders This Year</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{year} — {total} total</p>
+          <p className="text-sm font-semibold text-foreground">Orders Overview</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{rangeLabel} — {total} total</p>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span className="size-2 rounded-full bg-emerald-500 inline-block" />

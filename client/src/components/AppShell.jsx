@@ -23,7 +23,7 @@ import {
   Plus,
 } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
+import { UserAvatar } from '@/components/UserAvatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -47,16 +47,44 @@ function NavItem({ to, icon: Icon, label }) {
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
           isActive
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            ? 'bg-white/15 text-white'
+            : 'text-white/55 hover:bg-white/8 hover:text-white/90'
         )
       }
     >
-      <Icon size={18} />
+      <Icon size={17} />
       {label}
     </NavLink>
+  )
+}
+
+function CollapsibleNav({ icon: Icon, label, isActive, isOpen, onClick, children }) {
+  return (
+    <div>
+      <button
+        onClick={onClick}
+        className={cn(
+          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full',
+          isActive
+            ? 'text-white'
+            : 'text-white/55 hover:bg-white/8 hover:text-white/90'
+        )}
+      >
+        <Icon size={17} />
+        <span className="flex-1 text-left">{label}</span>
+        {isOpen
+          ? <ChevronDown size={13} className="opacity-60" />
+          : <ChevronRight size={13} className="opacity-60" />
+        }
+      </button>
+      {isOpen && (
+        <div className="mt-0.5 ml-[17px] pl-5 flex flex-col gap-0.5 border-l border-white/10">
+          {children}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -67,15 +95,23 @@ function SubNavItem({ to, label }) {
       end
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 pl-9 pr-3 py-1.5 rounded-lg text-sm transition-colors',
+          'flex items-center py-1.5 px-2 rounded-md text-sm transition-colors',
           isActive
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            ? 'text-white font-medium'
+            : 'text-white/45 hover:text-white/80'
         )
       }
     >
       {label}
     </NavLink>
+  )
+}
+
+function SidebarSection({ label }) {
+  return (
+    <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/25 select-none">
+      {label}
+    </p>
   )
 }
 
@@ -88,59 +124,31 @@ function AppShell({ children }) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifUnread, setNotifUnread] = useState(0)
-
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Close sidebar on route change (mobile)
   useEffect(() => { setSidebarOpen(false) }, [location.pathname])
 
-const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
+  const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
   const [ordersOpen, setOrdersOpen] = useState(isOnOrdersRoute)
-
-  useEffect(() => {
-    if (isOnOrdersRoute) setOrdersOpen(true)
-    else setOrdersOpen(false)
-  }, [location.pathname])
-
-  function handleOrdersClick() {
-    setOrdersOpen(true)
-    navigate('/orders')
-  }
+  useEffect(() => { setOrdersOpen(isOnOrdersRoute) }, [location.pathname])
+  function handleOrdersClick() { setOrdersOpen(true); navigate('/orders') }
 
   const isOnTasksRoute = taskRoutes.some(r => location.pathname === r)
   const [tasksOpen, setTasksOpen] = useState(isOnTasksRoute)
-
-  useEffect(() => {
-    if (isOnTasksRoute) setTasksOpen(true)
-    else setTasksOpen(false)
-  }, [location.pathname])
-
-  function handleTasksClick() {
-    setTasksOpen(true)
-    navigate('/tasks')
-  }
+  useEffect(() => { setTasksOpen(isOnTasksRoute) }, [location.pathname])
+  function handleTasksClick() { setTasksOpen(true); navigate('/tasks') }
 
   const isOnLeadsRoute = leadRoutes.some(r => location.pathname === r)
   const [leadsOpen, setLeadsOpen] = useState(isOnLeadsRoute)
+  useEffect(() => { setLeadsOpen(isOnLeadsRoute) }, [location.pathname])
+  function handleLeadsClick() { setLeadsOpen(true); navigate('/leads') }
 
-  useEffect(() => {
-    if (isOnLeadsRoute) setLeadsOpen(true)
-    else setLeadsOpen(false)
-  }, [location.pathname])
-
-  function handleLeadsClick() {
-    setLeadsOpen(true)
-    navigate('/leads')
-  }
-
-  // React to setting changes from the Settings page
   useEffect(() => {
     function handler(e) { setFeedOpen(e.detail) }
     window.addEventListener('activityFeedSetting', handler)
     return () => window.removeEventListener('activityFeedSetting', handler)
   }, [])
 
-  // Fetch unread feed count on mount
   useEffect(() => {
     if (!token) return
     const lastViewed = localStorage.getItem('feedLastViewed') || ''
@@ -156,7 +164,6 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
       .catch(() => {})
   }, [])
 
-  // Fetch unread notifications count on mount
   useEffect(() => {
     if (!token || !user?.id) return
     fetch(`${API}/notifications/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
@@ -168,7 +175,6 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
       .catch(() => {})
   }, [user?.id])
 
-  // Listen for live notification events to update badge
   useEffect(() => {
     if (!token) return
     const es = new EventSource(`${API}/comments/stream?token=${encodeURIComponent(token)}`)
@@ -197,13 +203,11 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
     }
   }
 
-  // ── Presence heartbeat ────────────────────────────────────────────────────
   const lastActivityRef = useRef(Date.now())
-  const IDLE_AFTER_MS = 5 * 60 * 1000 // 5 minutes of no interaction = idle
+  const IDLE_AFTER_MS = 5 * 60 * 1000
 
   useEffect(() => {
     if (!token) return
-
     function ping() {
       const idle = Date.now() - lastActivityRef.current > IDLE_AFTER_MS
       fetch(`${API}/presence/ping`, {
@@ -212,21 +216,15 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         body: JSON.stringify({ status: idle ? 'idle' : 'active' }),
       }).catch(() => {})
     }
-
     function onActivity() { lastActivityRef.current = Date.now() }
-    function onVisibility() {
-      if (document.visibilityState === 'visible') ping()
-    }
-
-    ping() // immediate on mount
+    function onVisibility() { if (document.visibilityState === 'visible') ping() }
+    ping()
     const interval = setInterval(ping, 30_000)
-
     window.addEventListener('mousemove', onActivity)
     window.addEventListener('keydown', onActivity)
     window.addEventListener('click', onActivity)
     window.addEventListener('touchstart', onActivity)
     document.addEventListener('visibilitychange', onVisibility)
-
     return () => {
       clearInterval(interval)
       window.removeEventListener('mousemove', onActivity)
@@ -252,7 +250,6 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
   const isSuperadmin = user?.role === 'superadmin'
-
   const isSettingsPage = location.pathname.startsWith('/settings')
 
   function getPageTitle(pathname) {
@@ -280,159 +277,126 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      <aside className={cn(
-        'fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-border bg-card transition-transform duration-200',
-        'lg:relative lg:w-60 lg:z-auto lg:translate-x-0 shrink-0',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      )}>
-        {/* Logo + mobile close */}
-        <div className="px-4 py-6 flex items-center justify-center relative">
-          <img src="/logo-color.svg" alt="MTPL" className="h-10 dark:hidden" />
-          <img src="/logo-white.svg" alt="MTPL" className="h-10 hidden dark:block" />
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-200',
+          'lg:relative lg:w-60 lg:z-auto lg:translate-x-0 shrink-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+        style={{ background: 'linear-gradient(180deg, #0f1e52 0%, #0d1a45 100%)' }}
+      >
+        {/* Logo */}
+        <div className="px-5 py-2.5 flex items-center justify-start lg:justify-center relative">
+          <img src="/logo-white.svg" alt="MTPL" className="h-11" />
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-muted-foreground hover:text-foreground absolute right-4"
+            className="lg:hidden text-white/40 hover:text-white/80 transition-colors absolute right-5"
           >
             <X size={18} />
           </button>
         </div>
-        <Separator />
+
+        {/* Divider */}
+        <div className="mx-4 h-px bg-white/10" />
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-2 flex flex-col overflow-y-auto">
+          <SidebarSection label="Main" />
           <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" />
 
-          {/* Orders collapsible */}
-          <div>
-            <button
-              onClick={handleOrdersClick}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full',
-                isOnOrdersRoute
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              )}
-            >
-              <ShoppingBag size={18} />
-              <span className="flex-1 text-left">Orders</span>
-              {ordersOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </button>
-
-            {ordersOpen && (
-              <div className="flex flex-col gap-0.5 mt-0.5">
-                <SubNavItem to="/orders" label="Active Orders" />
-                <SubNavItem to="/orders/completed" label="Completed" />
-                <SubNavItem to="/orders/long-pending" label="Long Pending" />
-                <SubNavItem to="/orders/all" label="All Orders" />
-              </div>
-            )}
-          </div>
+          <SidebarSection label="Management" />
+          <CollapsibleNav
+            icon={ShoppingBag}
+            label="Orders"
+            isActive={isOnOrdersRoute}
+            isOpen={ordersOpen}
+            onClick={handleOrdersClick}
+          >
+            <SubNavItem to="/orders" label="Active Orders" />
+            <SubNavItem to="/orders/completed" label="Completed" />
+            <SubNavItem to="/orders/long-pending" label="Long Pending" />
+            <SubNavItem to="/orders/all" label="All Orders" />
+          </CollapsibleNav>
 
           <NavItem to="/clients" icon={Users} label="Clients" />
           <NavItem to="/quotations" icon={FileText} label="Quotations" />
-          {/* Tasks collapsible */}
-          <div>
-            <button
-              onClick={handleTasksClick}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full',
-                isOnTasksRoute
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              )}
-            >
-              <CheckSquare size={18} />
-              <span className="flex-1 text-left">Tasks</span>
-              {tasksOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </button>
 
-            {tasksOpen && (
-              <div className="flex flex-col gap-0.5 mt-0.5">
-                <SubNavItem to="/tasks" label="All Tasks" />
-                <SubNavItem to="/tasks/in-queue" label="In Queue" />
-                <SubNavItem to="/tasks/working" label="Working" />
-                <SubNavItem to="/tasks/waiting" label="Waiting" />
-                <SubNavItem to="/tasks/done" label="Done" />
-              </div>
-            )}
-          </div>
-          {/* Leads collapsible */}
-          <div>
-            <button
-              onClick={handleLeadsClick}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full',
-                isOnLeadsRoute
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              )}
-            >
-              <TrendingUp size={18} />
-              <span className="flex-1 text-left">Leads</span>
-              {leadsOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </button>
+          <CollapsibleNav
+            icon={CheckSquare}
+            label="Tasks"
+            isActive={isOnTasksRoute}
+            isOpen={tasksOpen}
+            onClick={handleTasksClick}
+          >
+            <SubNavItem to="/tasks" label="All Tasks" />
+            <SubNavItem to="/tasks/in-queue" label="In Queue" />
+            <SubNavItem to="/tasks/working" label="Working" />
+            <SubNavItem to="/tasks/waiting" label="Waiting" />
+            <SubNavItem to="/tasks/done" label="Done" />
+          </CollapsibleNav>
 
-            {leadsOpen && (
-              <div className="flex flex-col gap-0.5 mt-0.5">
-                <SubNavItem to="/leads" label="All Leads" />
-                <SubNavItem to="/leads/open" label="Open" />
-                <SubNavItem to="/leads/won" label="Won" />
-                <SubNavItem to="/leads/lost" label="Lost" />
-              </div>
-            )}
-          </div>
+          <CollapsibleNav
+            icon={TrendingUp}
+            label="Leads"
+            isActive={isOnLeadsRoute}
+            isOpen={leadsOpen}
+            onClick={handleLeadsClick}
+          >
+            <SubNavItem to="/leads" label="All Leads" />
+            <SubNavItem to="/leads/open" label="Open" />
+            <SubNavItem to="/leads/won" label="Won" />
+            <SubNavItem to="/leads/lost" label="Lost" />
+          </CollapsibleNav>
 
           {isAdmin && (
             <>
-              <Separator className="my-2" />
+              <SidebarSection label="Admin" />
               <NavItem to="/archived" icon={Archive} label="Archived" />
             </>
           )}
           {isSuperadmin && (
-            <NavItem to="/activity" icon={ActivitySquare} label="Activity Log" />
+            <>
+              <NavItem to="/activity" icon={ActivitySquare} label="Activity Log" />
+              <NavItem to="/trash" icon={Trash2} label="Trash" />
+            </>
           )}
 
-          {isSuperadmin && (
-            <NavItem to="/trash" icon={Trash2} label="Trash" />
-          )}
-        </nav>
-
-        <Separator />
-
-        {/* Feed + Settings */}
-        <div className="px-3 py-3 flex flex-col gap-0.5">
+          <SidebarSection label="General" />
+          {/* Feed */}
           <button
             onClick={handleFeedToggle}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full',
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full',
               feedOpen
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                ? 'bg-white/15 text-white'
+                : 'text-white/55 hover:bg-white/8 hover:text-white/90'
             )}
           >
-            <MessageSquare size={18} />
-            <span className="flex-1 text-left">Recent Comments</span>
+            <MessageSquare size={17} />
+            <span className="flex-1 text-left">Comments</span>
             {unreadCount > 0 && (
               <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-semibold px-1">
                 {unreadCount}
               </span>
             )}
           </button>
+          {/* Notifications */}
           <button
             onClick={handleNotifToggle}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full',
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full',
               notifOpen
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                ? 'bg-white/15 text-white'
+                : 'text-white/55 hover:bg-white/8 hover:text-white/90'
             )}
           >
-            <Bell size={18} />
+            <Bell size={17} />
             <span className="flex-1 text-left">Notifications</span>
             {notifUnread > 0 && (
               <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-semibold px-1">
@@ -441,25 +405,25 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
             )}
           </button>
           <NavItem to="/settings" icon={Settings} label="Settings" />
-        </div>
+        </nav>
 
-        <div className="px-3 pb-4">
-          <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
-            <Avatar className="size-8 shrink-0">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-foreground leading-none truncate">{user?.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5 capitalize">{user?.role}</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              title="Logout"
-              className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
-            >
-              <LogOut size={16} />
-            </button>
+        {/* Divider */}
+        <div className="mx-4 h-px bg-white/10" />
+
+        {/* User section */}
+        <div className="px-4 py-4 flex items-center gap-3">
+          <UserAvatar name={user?.name} photoUrl={user?.photoUrl} size="size-8" textSize="text-xs" dark />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white leading-none truncate">{user?.name}</p>
+            <p className="text-xs text-white/40 mt-0.5 capitalize">{user?.role}</p>
           </div>
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            className="text-white/35 hover:text-white/80 transition-colors shrink-0"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </aside>
 
@@ -533,43 +497,42 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         </div>
 
         {/* Desktop content header */}
-        <div className="hidden lg:flex items-center gap-4 px-6 py-4 border-b border-border bg-card shrink-0">
+        <div className="hidden lg:flex items-center gap-4 px-6 border-b border-border bg-card shrink-0" style={{ paddingTop: '15px', paddingBottom: '15px' }}>
           <div className="shrink-0">
-            <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
+            <h1 className={`text-lg font-semibold text-foreground ${location.pathname === '/dashboard' ? 'leading-tight' : ''}`}>{pageTitle}</h1>
             {location.pathname === '/dashboard' && user?.name && (
-              <p className="text-xs text-muted-foreground mt-0.5">Welcome back, {user.name.split(' ')[0]}</p>
+              <p className="text-[11px] text-muted-foreground leading-none">Welcome back, {user.name.split(' ')[0]}</p>
             )}
           </div>
-          {/* Search bar */}
           <SearchBar token={token} className="flex-1 max-w-sm" />
           <div className="ml-auto shrink-0 flex items-center">
-          {!isSettingsPage && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" className="gap-1.5">
-                  <Plus size={14} />
-                  New
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44 backdrop-blur-sm bg-popover/65">
-                <DropdownMenuItem onClick={() => handleNewNavigate('/orders')}>
-                  <ShoppingBag size={14} /> Order
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNewNavigate('/clients')}>
-                  <Users size={14} /> Client
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNewNavigate('/quotations')}>
-                  <FileText size={14} /> Quotation
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNewNavigate('/leads')}>
-                  <TrendingUp size={14} /> Lead
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNewNavigate('/tasks')}>
-                  <CheckSquare size={14} /> Task
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+            {!isSettingsPage && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" className="gap-1.5">
+                    <Plus size={14} />
+                    New
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44 backdrop-blur-sm bg-popover/65">
+                  <DropdownMenuItem onClick={() => handleNewNavigate('/orders')}>
+                    <ShoppingBag size={14} /> Order
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNewNavigate('/clients')}>
+                    <Users size={14} /> Client
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNewNavigate('/quotations')}>
+                    <FileText size={14} /> Quotation
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNewNavigate('/leads')}>
+                    <TrendingUp size={14} /> Lead
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNewNavigate('/tasks')}>
+                    <CheckSquare size={14} /> Task
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
@@ -578,7 +541,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         </div>
       </main>
 
-      {/* Activity feed panel — full overlay on mobile, side panel on desktop */}
+      {/* Activity feed panel */}
       {feedOpen && (
         <div className="fixed inset-0 z-50 lg:hidden bg-card flex flex-col">
           <ActivityFeedPanel token={token} onClose={() => setFeedOpen(false)} />
@@ -588,12 +551,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         'hidden lg:block shrink-0 border-l border-border bg-card overflow-hidden transition-[width] duration-200',
         feedOpen ? 'w-80' : 'w-0'
       )}>
-        {feedOpen && (
-          <ActivityFeedPanel
-            token={token}
-            onClose={() => setFeedOpen(false)}
-          />
-        )}
+        {feedOpen && <ActivityFeedPanel token={token} onClose={() => setFeedOpen(false)} />}
       </div>
 
       {/* Notifications panel */}
@@ -621,7 +579,7 @@ const isOnOrdersRoute = orderRoutes.some(r => location.pathname === r)
         )}
       </div>
 
-      {/* Mobile / tablet-portrait bottom navigation bar */}
+      {/* Mobile bottom nav */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border flex items-stretch h-16 safe-area-inset-bottom">
         {[
           { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },

@@ -5,6 +5,7 @@ const authenticate = require("../middleware/auth");
 const logActivity = require("../helpers/logActivity");
 const jwt = require("jsonwebtoken");
 const { addClient, removeClient, pushToUser, pushToAll } = require("../config/sseClients");
+const { getPresignedUrl } = require("../config/r2Utils");
 
 // SSE stream — client connects here to receive live comment pushes
 router.get("/stream", (req, res) => {
@@ -50,7 +51,7 @@ router.get("/feed", authenticate, async (req, res) => {
     const result = await pool.query(
       `SELECT
         c.id, c.entity_type, c.entity_id, c.message, c.created_at, c.parent_id,
-        u.name AS author_name,
+        u.name AS author_name, u.photo AS author_photo,
         CASE WHEN c.message ILIKE '%@' || $2 || '%' THEN 'mention' ELSE 'assignment' END AS feed_reason,
         CASE
           WHEN c.entity_type = 'order'     THEN o.job_id
@@ -83,7 +84,16 @@ router.get("/feed", authenticate, async (req, res) => {
       LIMIT 50`,
       [userId, userName]
     );
-    res.json(result.rows);
+    const rows = await Promise.all(result.rows.map(async (row) => {
+      if (!row.author_photo) return row;
+      try {
+        const author_photo_url = await getPresignedUrl(row.author_photo, 3600);
+        return { ...row, author_photo_url };
+      } catch {
+        return row;
+      }
+    }));
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

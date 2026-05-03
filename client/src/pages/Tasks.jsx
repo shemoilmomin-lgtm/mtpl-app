@@ -28,6 +28,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MentionInput, renderWithMentions } from '@/components/MentionInput'
+import { CommentsPanel } from '@/components/CommentsPanel'
+import { UserAvatar as SharedUserAvatar } from '@/components/UserAvatar'
 
 const API = '/api'
 
@@ -59,16 +61,6 @@ function formatDateTime(str) {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
-}
-
-function parseMessage(msg) {
-  if (!msg) return { text: '', attachments: [] }
-  const attachments = []
-  const text = msg.replace(/\[attachment:([^|]+)\|([^\]]+)\]/g, (_, fileName, displayName) => {
-    attachments.push({ fileName, displayName })
-    return ''
-  }).trim()
-  return { text, attachments }
 }
 
 // ─── Utility components ───────────────────────────────────────────────────────
@@ -107,28 +99,10 @@ function avatarColor(name) {
   return AVATAR_COLORS[code % AVATAR_COLORS.length]
 }
 
-function UserAvatar({ name, size = 6 }) {
+function UserAvatar({ name, photoUrl, size = 6 }) {
   const sizeClass = size === 5 ? 'size-5' : size === 7 ? 'size-7' : size === 8 ? 'size-8' : 'size-6'
   const textClass = size <= 5 ? 'text-[10px]' : 'text-xs'
-  return (
-    <div className={cn(sizeClass, textClass, 'rounded-full flex items-center justify-center font-semibold shrink-0', avatarColor(name))}>
-      {name?.[0]?.toUpperCase() || '?'}
-    </div>
-  )
-}
-
-function AttachmentChip({ fileName, displayName }) {
-  return (
-    <a
-      href={`${API}/attachments/download/${encodeURIComponent(fileName)}`}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2.5 py-1 text-xs text-foreground hover:bg-muted transition-colors w-fit"
-    >
-      <Paperclip size={11} className="text-muted-foreground" />
-      {displayName}
-    </a>
-  )
+  return <SharedUserAvatar name={name} photoUrl={photoUrl} size={sizeClass} textSize={textClass} />
 }
 
 // ─── Client combobox ──────────────────────────────────────────────────────────
@@ -309,7 +283,7 @@ function UserMultiSelect({ users, value, onChange }) {
             }}
             className="flex items-center justify-between w-full px-2 py-1.5 text-sm hover:bg-muted/60 rounded-md text-left">
             <div className="flex items-center gap-2">
-              <UserAvatar name={u.name} size={5} />
+              <UserAvatar name={u.name} photoUrl={u.photoUrl} size={5} />
               <span>{u.name}</span>
             </div>
             {value.includes(u.id) && <Check size={13} className="text-primary" />}
@@ -317,269 +291,6 @@ function UserMultiSelect({ users, value, onChange }) {
         ))}
       </PopoverContent>
     </Popover>
-  )
-}
-
-// ─── Task comments tab ────────────────────────────────────────────────────────
-
-function TaskCommentsTab({ task, userMap, token, currentUser }) {
-  const [comments, setComments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [message, setMessage] = useState('')
-  const [sending, setSending] = useState(false)
-  const [replyTo, setReplyTo] = useState(null)
-  const [pendingFile, setPendingFile] = useState(null)
-  const fileInputRef = useRef(null)
-  const sendingRef = useRef(false)
-
-  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
-
-  function canDeleteComment(comment) {
-    if (isAdmin) return true
-    if (comment.user_id !== currentUser?.id) return false
-    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 30 * 60 * 1000
-  }
-
-  function canEditComment(comment) {
-    if (isAdmin) return true
-    if (comment.user_id !== currentUser?.id) return false
-    return (Date.now() - new Date(comment.created_at + 'Z').getTime()) < 2 * 60 * 60 * 1000
-  }
-
-  async function deleteComment(id) {
-    try {
-      await fetch(`${API}/comments/delete/${id}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      setComments(prev => prev.filter(c => c.id !== id))
-    } catch {}
-  }
-
-  async function editComment(id, newMessage) {
-    try {
-      const res = await fetch(`${API}/comments/edit/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ message: newMessage }),
-      })
-      if (res.ok) {
-        const updated = await res.json()
-        setComments(prev => prev.map(c => c.id === id ? { ...c, message: updated.message, edited_at: updated.edited_at } : c))
-      }
-    } catch {}
-  }
-
-  async function load() {
-    if (task.id < 0) { setLoading(false); return }
-    try {
-      const data = await fetch(`${API}/comments/task/${task.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.json())
-      setComments(Array.isArray(data) ? data : [])
-    } catch {}
-    setLoading(false)
-  }
-
-  useEffect(() => { load() }, [task.id])
-
-  useEffect(() => {
-    if (!token || task.id < 0) return
-    const es = new EventSource(`${API}/comments/stream?token=${encodeURIComponent(token)}`)
-    es.addEventListener('entity_comment', (e) => {
-      try {
-        const c = JSON.parse(e.data)
-        if (c.entity_type === 'task' && String(c.entity_id) === String(task.id)) {
-          setComments(prev => prev.some(x => x.id === c.id) ? prev : [c, ...prev])
-        }
-      } catch {}
-    })
-    return () => es.close()
-  }, [token, task.id])
-
-  async function sendComment() {
-    if (sendingRef.current) return
-    if (!message.trim() && !pendingFile) return
-    sendingRef.current = true
-    setSending(true)
-    try {
-      let attachmentRef = ''
-      if (pendingFile) {
-        const fd = new FormData()
-        fd.append('file', pendingFile)
-        const up = await fetch(`${API}/attachments/upload`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: fd,
-        }).then(r => r.json())
-        if (up.success) attachmentRef = `\n[attachment:${up.fileName}|${pendingFile.name}]`
-      }
-      const fullMessage = message.trim() + attachmentRef
-      if (!fullMessage.trim()) { setSending(false); return }
-      const res = await fetch(`${API}/comments/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          entity_type: 'task',
-          entity_id: task.id,
-          user_id: currentUser.id,
-          message: fullMessage,
-          parent_id: replyTo?.id ?? null,
-        }),
-      })
-      if (res.ok) {
-        const saved = await res.json()
-        setComments(prev => prev.some(x => x.id === saved.id) ? prev : [saved, ...prev])
-        setMessage(''); setPendingFile(null); setReplyTo(null)
-      }
-    } catch {}
-    sendingRef.current = false
-    setSending(false)
-  }
-
-  const threads = useMemo(() => {
-    const topLevel = comments.filter(c => !c.parent_id)
-    const replies = comments.filter(c => c.parent_id)
-    return topLevel.map(c => ({ ...c, replies: replies.filter(r => r.parent_id === c.id) }))
-  }, [comments])
-
-  function CommentCard({ comment, isReply }) {
-    const author = userMap[comment.user_id]
-    const { text, attachments } = parseMessage(comment.message)
-    const canDelete = canDeleteComment(comment)
-    const canEdit = canEditComment(comment)
-    const [editing, setEditing] = useState(false)
-    const [editText, setEditText] = useState(text)
-
-    async function saveEdit() {
-      if (!editText.trim()) return
-      const attachmentPart = comment.message.match(/(\[attachment:[^\]]+\])/g)?.join(' ') || ''
-      const newMessage = editText.trim() + (attachmentPart ? '\n' + attachmentPart : '')
-      await editComment(comment.id, newMessage)
-      setEditing(false)
-    }
-
-    return (
-      <div className={cn('rounded-xl border border-border p-3.5 flex flex-col gap-2', isReply && 'bg-muted/20')}>
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <UserAvatar name={author?.name} />
-            <span className="text-xs font-semibold text-foreground">{author?.name || 'Unknown'}</span>
-            <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
-            {comment.edited_at && <span className="text-[10px] text-muted-foreground/60">(edited)</span>}
-          </div>
-          <div className="flex items-center gap-1">
-            {!isReply && (
-              <button type="button"
-                onClick={() => setReplyTo(replyTo?.id === comment.id ? null : comment)}
-                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
-                <Reply size={11} />
-                Reply
-              </button>
-            )}
-            {canEdit && !editing && (
-              <button type="button"
-                onClick={() => { setEditText(text); setEditing(true) }}
-                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ml-0.5">
-                <Pencil size={11} />
-              </button>
-            )}
-            {canDelete && (
-              <button type="button"
-                onClick={() => deleteComment(comment.id)}
-                className="flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-0.5">
-                <Trash2 size={11} />
-              </button>
-            )}
-          </div>
-        </div>
-        {editing ? (
-          <div className="flex flex-col gap-2">
-            <textarea
-              value={editText}
-              onChange={e => setEditText(e.target.value)}
-              className="w-full bg-input/50 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30 resize-none"
-              rows={3}
-              autoFocus
-            />
-            <div className="flex gap-2 justify-end">
-              <button type="button" onClick={() => setEditing(false)} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-muted">Cancel</button>
-              <button type="button" onClick={saveEdit} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90">Save</button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {text && <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{renderWithMentions(text, Object.values(userMap))}</p>}
-            {attachments.map((a, i) => (
-              <AttachmentChip key={i} fileName={a.fileName} displayName={a.displayName} token={token} />
-            ))}
-          </>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-3">
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
-        ) : threads.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No comments yet.</p>
-        ) : (
-          threads.map(thread => (
-            <div key={thread.id} className="flex flex-col gap-2">
-              <CommentCard comment={thread} isReply={false} />
-              {thread.replies.length > 0 && (
-                <div className="pl-4 flex flex-col gap-2">
-                  {thread.replies.map(reply => (
-                    <div key={reply.id} className="flex items-start gap-2">
-                      <CornerDownRight size={13} className="shrink-0 mt-3 text-muted-foreground/40" />
-                      <div className="flex-1"><CommentCard comment={reply} isReply={true} /></div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-
-      <div className="shrink-0 border-t border-border px-6 py-4 flex flex-col gap-2">
-        {replyTo && (
-          <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground">
-            <span>Replying to <span className="font-medium text-foreground">{userMap[replyTo.user_id]?.name || 'Unknown'}</span></span>
-            <button type="button" onClick={() => setReplyTo(null)} className="hover:text-foreground"><X size={12} /></button>
-          </div>
-        )}
-        {pendingFile && (
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs w-fit">
-            <Paperclip size={11} className="text-muted-foreground" />
-            <span className="text-foreground">{pendingFile.name}</span>
-            <button type="button" onClick={() => setPendingFile(null)} className="text-muted-foreground hover:text-foreground"><X size={11} /></button>
-          </div>
-        )}
-        <div className="flex gap-2">
-          <input type="file" ref={fileInputRef} className="hidden"
-            onChange={e => { if (e.target.files?.[0]) setPendingFile(e.target.files[0]); e.target.value = '' }} />
-          <button type="button" onClick={() => fileInputRef.current?.click()} title="Attach file"
-            className="flex items-center justify-center size-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0">
-            <Paperclip size={14} />
-          </button>
-          <MentionInput
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendComment() } }}
-            placeholder={replyTo ? 'Write a reply…' : 'Write a comment…'}
-            users={Object.values(userMap)}
-            className="w-full bg-white dark:bg-zinc-900 px-4 py-2 text-sm outline-none placeholder:text-muted-foreground appearance-none"
-          />
-          <Button size="sm" onClick={sendComment} disabled={sending || (!message.trim() && !pendingFile)}>
-            {sending ? '…' : 'Send'}
-          </Button>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -873,7 +584,7 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
                 <div className="flex flex-wrap gap-2">
                   {task.assignees.map(a => (
                     <div key={a.id} className="flex items-center gap-1.5 bg-muted rounded-full px-2.5 py-1 text-xs text-foreground">
-                      <UserAvatar name={a.name} size={5} />
+                      <UserAvatar name={a.name} photoUrl={a.photoUrl} size={5} />
                       {a.name}
                     </div>
                   ))}
@@ -942,7 +653,13 @@ function TaskView({ task, clientMap, orderMap, userMap, currentUser, onEdit, onC
         )}
 
         {activeTab === 'comments' && (
-          <TaskCommentsTab task={task} userMap={userMap} token={token} currentUser={currentUser} />
+          <CommentsPanel
+            entityType="task"
+            entityId={task.id}
+            token={token}
+            currentUser={currentUser}
+            users={Object.values(userMap)}
+          />
         )}
 
         {activeTab === 'reminders' && (
@@ -1533,9 +1250,8 @@ function Tasks({ tab = 'all' }) {
                       <div className="flex items-center gap-1.5">
                         <div className="flex items-center gap-0.5">
                           {task.assignees.slice(0, 2).map(a => (
-                            <div key={a.id} title={a.name}
-                              className="size-5 rounded-full bg-muted flex items-center justify-center text-[9px] font-semibold text-muted-foreground shrink-0">
-                              {a.name?.[0]?.toUpperCase() || '?'}
+                            <div key={a.id} title={a.name}>
+                              <UserAvatar name={a.name} photoUrl={a.photoUrl} size={5} />
                             </div>
                           ))}
                         </div>
@@ -1656,9 +1372,8 @@ function Tasks({ tab = 'all' }) {
                       {task.assignees?.length > 0 ? (
                         <div className="flex items-center gap-1">
                           {task.assignees.slice(0, 3).map(a => (
-                            <div key={a.id} title={a.name}
-                              className="size-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-muted-foreground shrink-0">
-                              {a.name?.[0]?.toUpperCase() || '?'}
+                            <div key={a.id} title={a.name}>
+                              <UserAvatar name={a.name} photoUrl={a.photoUrl} size={6} />
                             </div>
                           ))}
                           {task.assignees.length > 3 && (

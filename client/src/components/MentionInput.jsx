@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
+import { UserAvatar } from '@/components/UserAvatar'
 
 // Renders comment text with @Name mentions highlighted
 export function renderWithMentions(text, users) {
@@ -21,11 +22,18 @@ export function renderWithMentions(text, users) {
 
 // Drop-in replacement for <input> with @mention popup
 // Wraps itself in a relative flex-1 div — callers should not add flex-1 to className
-export function MentionInput({ value, onChange, onKeyDown, placeholder, users = [], className }) {
+export const MentionInput = forwardRef(function MentionInput({ value, onChange, onKeyDown, placeholder, users = [], className }, ref) {
   const [query, setQuery] = useState(null)   // null = closed, string = active query
   const [atIndex, setAtIndex] = useState(-1) // index of the triggering @ in value
   const [selected, setSelected] = useState(0)
   const inputRef = useRef(null)
+
+  useImperativeHandle(ref, () => ({
+    reset() {
+      const el = inputRef.current
+      if (el) { el.style.height = 'auto' }
+    }
+  }))
 
   const filtered = query !== null
     ? users.filter(u => u.name.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
@@ -98,7 +106,7 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
   }
 
   return (
-    <div className="relative flex-1 rounded-3xl border border-border focus-within:border-foreground/30 transition-colors">
+    <div className="relative flex-1">
       <textarea
         ref={inputRef}
         value={value}
@@ -121,9 +129,7 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
                 i === selected ? 'bg-muted' : 'hover:bg-muted/50'
               }`}
             >
-              <div className="size-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-semibold text-primary shrink-0">
-                {user.name[0].toUpperCase()}
-              </div>
+              <UserAvatar name={user.name} photoUrl={user.photoUrl} size="size-5" textSize="text-[10px]" />
               <span className="text-sm text-foreground">{user.name}</span>
             </button>
           ))}
@@ -131,4 +137,4 @@ export function MentionInput({ value, onChange, onKeyDown, placeholder, users = 
       )}
     </div>
   )
-}
+})
