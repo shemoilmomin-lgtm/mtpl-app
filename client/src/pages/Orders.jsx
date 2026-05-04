@@ -664,7 +664,7 @@ function DetailsTab({ order, client, preparedByUser, quotationAmount, quotationR
               initialValue={order.proforma_invoice_number}
               orderId={order.id}
               token={token}
-              canEdit={isAdmin}
+              canEdit
             />
             <InlineInvoiceField
               label="Invoice No."
@@ -672,13 +672,13 @@ function DetailsTab({ order, client, preparedByUser, quotationAmount, quotationR
               initialValue={order.invoice_number}
               orderId={order.id}
               token={token}
-              canEdit={isAdmin}
+              canEdit
             />
             <InlineDeliveryField
               initialValue={order.delivery_expected}
               orderId={order.id}
               token={token}
-              canEdit={isAdmin}
+              canEdit
             />
           </div>
 
