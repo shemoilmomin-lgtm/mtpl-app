@@ -580,7 +580,7 @@ function AppShell({ children }) {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border flex items-stretch h-16 safe-area-inset-bottom">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border flex items-stretch h-20 safe-area-inset-bottom">
         {[
           { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
           { to: '/orders',    icon: ShoppingBag,     label: 'Orders' },
@@ -593,11 +593,16 @@ function AppShell({ children }) {
               key={to}
               onClick={() => navigate(to)}
               className={cn(
-                'flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors',
+                'flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors',
                 isActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+              <div className={cn(
+                'px-5 py-1.5 rounded-full transition-colors',
+                isActive ? 'bg-primary' : 'bg-transparent'
+              )}>
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} className={isActive ? 'text-white' : ''} />
+              </div>
               {label}
             </button>
           )

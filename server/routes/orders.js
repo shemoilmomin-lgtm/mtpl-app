@@ -48,12 +48,9 @@ router.get("/trashed", authenticate, async (req, res) => {
   }
 });
 
-// Inline-edit invoice numbers from view mode (admin+)
+// Inline-edit invoice numbers from view mode (all authenticated users)
 router.patch("/:id/invoice", authenticate, async (req, res) => {
-  const { role, id: userId } = req.user;
-  if (role !== "admin" && role !== "superadmin") {
-    return res.status(403).json({ error: "Forbidden" });
-  }
+  const { id: userId } = req.user;
   const { field, value } = req.body;
   if (!["proforma_invoice_number", "invoice_number", "delivery_expected"].includes(field)) {
     return res.status(400).json({ error: "Invalid field" });

@@ -290,12 +290,29 @@ function PreferencesTab({ token, isSuperadmin }) {
     if (!file) return
     setUploadingPhoto(true)
     try {
-      const form = new FormData()
-      form.append('photo', file)
+      // Resize to max 128x128 using canvas before sending
+      const dataUrl = await new Promise((resolve, reject) => {
+        const img = new Image()
+        const url = URL.createObjectURL(file)
+        img.onload = () => {
+          URL.revokeObjectURL(url)
+          const MAX = 350
+          let { width, height } = img
+          if (width > height) { height = Math.round(height * MAX / width); width = MAX }
+          else { width = Math.round(width * MAX / height); height = MAX }
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+          resolve(canvas.toDataURL('image/jpeg', 0.85))
+        }
+        img.onerror = reject
+        img.src = url
+      })
       const res = await fetch(`${API}/users/${user.id}/photo`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photo: dataUrl }),
       })
       const data = await res.json()
       if (data.photoUrl) {
@@ -532,7 +549,7 @@ function AppUpdateSection() {
     <div className="lg:hidden pt-3 border-t border-border flex flex-col gap-3">
       <div>
         <p className="text-sm font-medium text-foreground">App Version</p>
-        <p className="text-xs text-muted-foreground">v3.3</p>
+        <p className="text-xs text-muted-foreground">v{import.meta.env.VITE_APP_VERSION}</p>
       </div>
       <Button className="w-full" variant="outline" onClick={() => window.location.reload()}>
         Refresh
@@ -893,7 +910,7 @@ function Settings() {
       {activeTab === 'feedback' && <FeedbackTab token={token} />}
       {activeTab === 'feedbacks' && isAdmin && <FeedbacksTab token={token} />}
 
-      <p className="text-xs text-muted-foreground/50 pt-2">v3.3</p>
+      <p className="text-xs text-muted-foreground/50 pt-2">v{import.meta.env.VITE_APP_VERSION}</p>
     </div>
   )
 }
